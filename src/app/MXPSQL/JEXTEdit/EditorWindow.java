@@ -1112,7 +1112,7 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     class CaretAction implements CaretListener
     {
-        public int getRow(int pos,JTextPane textpane)
+        public int getRow(int pos,JTextArea textpane)
         {
             int rn=(pos==0) ? 1:0;
             try
@@ -1129,7 +1129,7 @@ class Window_MenuItemsAction implements ActionListener
             return rn;
         }
 
-        public int getColumn(int pos,JTextPane textpane)
+        public int getColumn(int pos,JTextArea textpane)
         {
             try
             {
@@ -1143,7 +1143,7 @@ class Window_MenuItemsAction implements ActionListener
         @Override
         public void caretUpdate(CaretEvent evt)
         {
-            JTextPane textpane=(JTextPane)evt.getSource();
+            JTextArea textpane=(JTextArea)evt.getSource();
             int row = getRow(evt.getDot(), textpane);
             int col = getColumn(evt.getDot(), textpane);
             rowLabel.setText("Row : "+row);
@@ -1167,7 +1167,7 @@ class Window_MenuItemsAction implements ActionListener
     public void File_New_Action()
     {
         //crerate textpane object
-         JTextPane _textPane=new JTextPane();
+         JTextArea _textPane=new JTextArea();
 
          _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
@@ -1230,7 +1230,7 @@ class Window_MenuItemsAction implements ActionListener
 
                int count=_tabbedPane.getTabCount();
 
-               JTextPane _textPane=new JTextPane();
+               JTextArea _textPane=new JTextArea();
                _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
                if (isDarkTheme) {
@@ -1289,7 +1289,7 @@ class Window_MenuItemsAction implements ActionListener
          {
             String filename=filenameLabel.getText();
             int sel=_tabbedPane.getSelectedIndex();
-            JTextPane textPane=(JTextPane)(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane=(JTextArea)(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             if(filename.contains("\\")||filename.contains("/"))
             {
               File f=new File(filename);
@@ -1344,7 +1344,7 @@ class Window_MenuItemsAction implements ActionListener
             {
                 String filename = fd.getDirectory() + fd.getFile();
                 int sel = _tabbedPane.getSelectedIndex();
-                JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+                JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
                 try
                 {
                     DataOutputStream d = new DataOutputStream(new FileOutputStream(filename));
@@ -1389,7 +1389,7 @@ class Window_MenuItemsAction implements ActionListener
                 _tabbedPane.setSelectedIndex(i);
                 String filename = filenameLabel.getText();
                 int sel = _tabbedPane.getSelectedIndex();
-                JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+                JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
                 if (filename.contains("\\")||filename.contains("/"))
                 {
                     File f = new File(filename);
@@ -1447,7 +1447,7 @@ class Window_MenuItemsAction implements ActionListener
                 if (n == 0)
                 {
                     String filename = filenameLabel.getText();
-                    JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+                    JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
                     if (filename.contains("\\")||filename.contains("/"))
                     {
@@ -1621,7 +1621,7 @@ class Window_MenuItemsAction implements ActionListener
                 if (n == 0)
                 {
                     String filename = filenameLabel.getText();
-                    JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+                    JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
                     if (filename.contains("\\")||filename.contains("/"))
                     {
@@ -1790,7 +1790,7 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             String selected_text = textPane.getSelectedText();
             StringSelection ss = new StringSelection(selected_text);
             clip.setContents(ss, ss);
@@ -1817,7 +1817,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             String selected_text = textPane.getSelectedText();
             StringSelection ss = new StringSelection(selected_text);
             clip.setContents(ss, ss);
@@ -1835,7 +1835,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             Transferable cliptran = clip.getContents(EditorWindow.this);
             try
             {
@@ -1870,7 +1870,7 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             do
             {
@@ -1900,7 +1900,7 @@ class Window_MenuItemsAction implements ActionListener
     }
 
     int _lineCount;
-    public int getLineCount(JTextPane textPane)
+    public int getLineCount(JTextArea textPane)
     {
         _lineCount = 0;
         Scanner scanner = new Scanner(textPane.getText());
@@ -1912,7 +1912,7 @@ class Window_MenuItemsAction implements ActionListener
         return _lineCount;
     }
 
-    public int SetCursor(int newlineno,JTextPane textPane)
+    public int SetCursor(int newlineno,JTextArea textPane)
     {
         int pos = 0;
         int i = 0;
@@ -1941,7 +1941,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             String input=(String) JOptionPane.showInputDialog(null,"Enter Text to Find :  ", "Find",JOptionPane.PLAIN_MESSAGE, null, null, null);
             if(input!=null)
@@ -2019,7 +2019,7 @@ class Window_MenuItemsAction implements ActionListener
             if(source==replaceButton)
             {
                 int sel = _tabbedPane.getSelectedIndex();
-                JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+                JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
                 String find=findText.getText();
                 String replace=replaceText.getText();
@@ -2053,7 +2053,7 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             textPane.selectAll();
         }
@@ -2070,7 +2070,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if(textPane.getSelectedText()!=null)
             {
@@ -2098,7 +2098,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if (textPane.getSelectedText() != null)
             {
@@ -2126,7 +2126,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if (textPane.getSelectedText() != null)
             {
@@ -2198,7 +2198,7 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             JDialog fa = new FontAction(textPane);
             fa.setTitle("Set Font");
@@ -2221,7 +2221,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             ForeBackColorAction.ForeColor_Action fra=new ForeBackColorAction.ForeColor_Action(textPane);
             fra.setTitle("Set Fore Color");
@@ -2245,7 +2245,7 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
-            JTextPane textPane = (JTextPane) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             ForeBackColorAction.BackColor_Action bra = new ForeBackColorAction.BackColor_Action(textPane);
             bra.setTitle("Set Back Color");

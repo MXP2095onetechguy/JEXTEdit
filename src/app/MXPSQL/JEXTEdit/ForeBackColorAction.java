@@ -11,9 +11,31 @@ public class ForeBackColorAction
         JColorChooser chooser = new JColorChooser(Color.WHITE);
         JPanel jp;
         JButton ok, cancel;
-        JTextPane textPane;
+        // JTextPane textPane;
+        JTextArea textPane;
 
-        public ForeColor_Action(JTextPane tx)
+        /* public ForeColor_Action(JTextPane tx)
+        {
+            textPane = tx;
+
+            Container cp = getContentPane();
+
+            jp = new JPanel();
+
+            ok = new JButton("  OK  ");
+            cancel = new JButton(" Cancel ");
+
+            ok.addActionListener(this);
+            cancel.addActionListener(this);
+
+            jp.add(ok);
+            jp.add(cancel);
+
+            cp.add(chooser, BorderLayout.CENTER);
+            cp.add(jp, BorderLayout.SOUTH);
+        } */
+        
+        public ForeColor_Action(JTextArea tx)
         {
             textPane = tx;
 
@@ -59,11 +81,33 @@ public class ForeBackColorAction
         JColorChooser chooser = new JColorChooser(Color.WHITE);
         JPanel jp;
         JButton ok, cancel;
-        JTextPane textPane;
+        // JTextPane textPane;
+        JTextArea textArea;
 
-        public BackColor_Action(JTextPane tx)
+        /* public BackColor_Action(JTextPane textPane2)
         {
-            textPane = tx;
+            textPane = textPane2;
+
+            Container cp = getContentPane();
+
+            jp = new JPanel();
+
+            ok = new JButton("  OK  ");
+            cancel = new JButton(" Cancel ");
+
+            ok.addActionListener(this);
+            cancel.addActionListener(this);
+
+            jp.add(ok);
+            jp.add(cancel);
+
+            cp.add(chooser, BorderLayout.CENTER);
+            cp.add(jp, BorderLayout.SOUTH);
+        } */
+        
+        public BackColor_Action(JTextArea textPane2)
+        {
+            textArea = textPane2;
 
             Container cp = getContentPane();
 
@@ -90,7 +134,7 @@ public class ForeBackColorAction
                 Color color = chooser.getColor();
                 if (color != null)
                 {
-                    textPane.setBackground(color);
+                    textArea.setBackground(color);
                 }
                 this.dispose();
             }

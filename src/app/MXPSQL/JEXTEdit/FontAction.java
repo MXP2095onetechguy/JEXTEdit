@@ -35,11 +35,85 @@ public final class FontAction extends JDialog implements ListSelectionListener,A
     DefaultListModel model;
     JLabel displayLabel;
     JButton ok,cancel;
-    JTextPane textPane;
+    // JTextPane textPane;
+    JTextArea textPane;
 
     static boolean isDarkTheme = false;
 
-    public FontAction(JTextPane tx)
+    /* public FontAction(JTextPane tx)
+    {
+        textPane=tx;
+
+        Container cp=getContentPane();
+
+        isDarkTheme = getNodeTextContent("lookAndFeel").equals("GlobalDark");
+
+        fontsList=new JList(fontNames);
+        fontStyleList=new JList(fontStyles);
+
+        fontsList.setFont(new Font("Calibri",Font.PLAIN,14));
+        fontStyleList.setFont(new Font("Calibri",Font.PLAIN,14));
+
+        model=new DefaultListModel();
+        fontSizeList = new JList(model);
+        fontSizeList.setFont(new Font("Calibri", Font.PLAIN, 14));
+
+
+        for(int i=1;i<=160;i++)
+        {
+            model.addElement("  "+i+"        ");
+        }
+
+
+        fontsList.setSelectedIndex(8);
+        fontStyleList.setSelectedIndex(0);
+        fontSizeList.setSelectedIndex(21);
+
+        fontsList.addListSelectionListener(this);
+        fontStyleList.addListSelectionListener(this);
+        fontSizeList.addListSelectionListener(this);
+
+        jp1=new JPanel();
+        jp2=new JPanel();
+        JPanel jp3=new JPanel();
+        jp3.add(new JScrollPane(fontsList));
+
+
+        JPanel jp4=new JPanel();
+        jp4.setLayout(new GridLayout(0,2));
+        jp4.add(new JScrollPane(fontStyleList));
+        jp4.add(new JScrollPane(fontSizeList));
+
+        jp1.add(jp3,BorderLayout.WEST);
+        jp1.add(jp4,BorderLayout.EAST);
+
+        displayLabel=new JLabel("Java Programming",JLabel.CENTER);
+        displayLabel.setFont(new Font("Arial",Font.PLAIN,21));
+
+        jp1.add(displayLabel);
+
+        ok=new JButton("  OK  ");
+        cancel=new JButton("  Cancel  ");
+
+        if (isDarkTheme) {
+            fontsList.setBackground(new Color(40, 40, 40));
+            fontStyleList.setBackground(new Color(40, 40, 40));
+            fontSizeList.setBackground(new Color(40, 40, 40));
+            displayLabel.setForeground(new Color(240, 240, 240));
+        }
+
+        ok.addActionListener(this);
+        cancel.addActionListener(this);
+
+        jp2.add(ok);
+        jp2.add(cancel);
+
+        cp.add(jp1,BorderLayout.CENTER);
+        cp.add(jp2,BorderLayout.SOUTH);
+
+    } */
+    
+    public FontAction(JTextArea tx)
     {
         textPane=tx;
 

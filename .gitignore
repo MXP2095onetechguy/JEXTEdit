@@ -1,0 +1,9 @@
+# Very Scary Very Scary
+
+bin/*.class
+bin/*.jar
+bin/
+
+target/*
+
+.settings/*

@@ -23,7 +23,7 @@ public class LookAndFeelAction
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             JFrame.setDefaultLookAndFeelDecorated(false);
-            EditorWindow tb = new EditorWindow("");
+            EditorWindow tb = new EditorWindow("", new Namespace(null));
             tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
             BufferedImage image = null;
             try {
@@ -43,7 +43,7 @@ public class LookAndFeelAction
         try
         {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-            EditorWindow tb = new EditorWindow("");
+            EditorWindow tb = new EditorWindow("", new Namespace(null));
             tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
             BufferedImage image = null;
             try {
@@ -64,7 +64,7 @@ public class LookAndFeelAction
         try
         {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-            EditorWindow tb=new EditorWindow("");
+            EditorWindow tb=new EditorWindow("", new Namespace(null));
             tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
             BufferedImage image = null;
             try {
@@ -84,7 +84,7 @@ public class LookAndFeelAction
         try
         {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-            EditorWindow tb = new EditorWindow("");
+            EditorWindow tb = new EditorWindow("", new Namespace(null));
             tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
             BufferedImage image = null;
             try {
@@ -105,7 +105,7 @@ public class LookAndFeelAction
         try
         {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
-            EditorWindow tb = new EditorWindow("");
+            EditorWindow tb = new EditorWindow("", new Namespace(null));
             tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
             BufferedImage image = null;
             try {
@@ -130,7 +130,7 @@ public class LookAndFeelAction
         }
 
         JFrame.setDefaultLookAndFeelDecorated(true);
-        EditorWindow tb = new EditorWindow("");
+        EditorWindow tb = new EditorWindow("", new Namespace(null));
         tb.setExtendedState(JFrame.MAXIMIZED_BOTH);
         BufferedImage image = null;
         try {

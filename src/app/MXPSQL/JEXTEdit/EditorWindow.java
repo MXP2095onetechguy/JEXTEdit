@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 
 import javax.xml.bind.*;
 import javax.xml.parsers.*;
@@ -80,6 +81,8 @@ public final class EditorWindow extends JFrame
 
     JPopupMenu _popupMenu;
     
+    Namespace ns;
+    
     
     public String viewPath = "src/app/MXPSQL/JEXTEdit/files/viewsfile.xml";
 
@@ -100,11 +103,15 @@ public final class EditorWindow extends JFrame
 
 
     // create constructor of TabbedNotepad class
-    public EditorWindow(String viewp)
+    public EditorWindow(String viewp, Namespace nss)
     {
+    	
+    	ns = nss;
     	
     	viewPath = viewp;
         setTitle("JEXTEdit");
+        
+        // setUndecorated(true);
 
 
         mb=new JMenuBar();
@@ -209,6 +216,12 @@ public final class EditorWindow extends JFrame
          JMenuItem edit_changecase_upper=new JMenuItem("  Upper Case   ");
          JMenuItem edit_changecase_lower = new JMenuItem("  Lower Case   ");
          JMenuItem edit_changecase_sentence = new JMenuItem("  Sentence Case   ");
+         
+         JMenuItem edit_user = new JMenuItem("  Insert username");
+         edit_user.setIcon(new ImageIcon(this.getClass().getResource("resources/user.png")));
+         
+         JMenuItem edit_time = new JMenuItem("  Insert time");
+         edit_time.setIcon(new ImageIcon(this.getClass().getResource("resources/time.png")));
 
          JMenuItem edit_nextdocument=new JMenuItem("  Next Document   ");
          JMenuItem edit_previousdocument = new JMenuItem("  Previous Document   ");
@@ -226,15 +239,32 @@ public final class EditorWindow extends JFrame
         edit_changecase_upper.addActionListener(edit_action);
         edit_changecase_lower.addActionListener(edit_action);
         edit_changecase_sentence.addActionListener(edit_action);
+        edit_user.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(System.getProperty("user.name"), textPane.getCaretPosition());
+        	}
+        });        
+        
+        edit_time.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(new SimpleDateFormat("dd/MM/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime()), textPane.getCaretPosition());
+        	}
+        });
         edit_nextdocument.addActionListener(edit_action);
-        edit_previousdocument.addActionListener(edit_action);
+        edit_previousdocument.addActionListener(edit_action);   
 
         edit_undo.addActionListener(undoAction);
         edit_redo.addActionListener(redoAction);
 
         // add MenuListener to menu items
         JMenuItem[] editmenuitems={ edit_cut,edit_copy,edit_paste,edit_undo,edit_redo,edit_find,edit_replace,edit_goto,edit_selectall,
-                                                      edit_changecase_upper,edit_changecase_lower,edit_changecase_sentence,edit_nextdocument,edit_previousdocument};
+                                                      edit_changecase_upper,edit_changecase_lower,edit_changecase_sentence,edit_user, edit_time,edit_nextdocument,edit_previousdocument};
 
         Menus_MenuListener eml=new Menus_MenuListener(editmenuitems);
         edit.addMenuListener(eml);
@@ -415,6 +445,9 @@ public final class EditorWindow extends JFrame
         edit_changecase.add(edit_changecase_sentence);
         edit.add(edit_changecase);
         edit.addSeparator();
+        edit.add(edit_user);
+        edit.add(edit_time);
+        edit.addSeparator();
         edit.add(edit_nextdocument);
         edit.add(edit_previousdocument);
 
@@ -427,7 +460,6 @@ public final class EditorWindow extends JFrame
         view.addSeparator();
         view.add(view_forecolor);
         view.add(view_backcolor);
-        view.addSeparator();
         view.addSeparator();
         view_tabsalign.add(view_tabsalign_top);
         view_tabsalign.add(view_tabsalign_bottom);
@@ -580,7 +612,7 @@ public final class EditorWindow extends JFrame
             statusBar.setBackground(new Color(10, 10, 10));
         }
 
-        readylabel=new JLabel("Advanced Notepad in Java");
+        readylabel=new JLabel("JEXTEdit");
         readylabel.setFont(new Font("Calibri",Font.PLAIN,15));
         filenameLabel.setFont(new Font("Calibri",Font.PLAIN,15));
         statusBar.add(readylabel);
@@ -630,6 +662,12 @@ public final class EditorWindow extends JFrame
         popup_edit_paste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
 
         JMenuItem popup_edit_selectall = new JMenuItem("  Select All");
+        
+        JMenuItem popup_edit_user = new JMenuItem("  Insert Username");
+        popup_edit_user.setIcon(new ImageIcon(this.getClass().getResource("resources/user.png")));
+        
+        JMenuItem popup_edit_time = new JMenuItem("  Insert Time");
+        popup_edit_time.setIcon(new ImageIcon(this.getClass().getResource("resources/time.png")));
 
         JMenu popup_edit_changecase = new JMenu("  Change Case");
         JMenuItem popup_edit_changecase_upper = new JMenuItem("  Upper Case   ");
@@ -649,6 +687,23 @@ public final class EditorWindow extends JFrame
         popup_edit_copy.addActionListener(edit_action);
         popup_edit_paste.addActionListener(edit_action);
         popup_edit_selectall.addActionListener(edit_action);
+        popup_edit_user.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(System.getProperty("user.name"), textPane.getCaretPosition());
+        	}
+        });        
+        
+        popup_edit_time.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(new SimpleDateFormat("dd/MM/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime()), textPane.getCaretPosition());
+        	}
+        });
         popup_edit_changecase_upper.addActionListener(edit_action);
         popup_edit_changecase_lower.addActionListener(edit_action);
         popup_edit_changecase_sentence.addActionListener(edit_action);
@@ -658,8 +713,11 @@ public final class EditorWindow extends JFrame
         _popupMenu.add(popup_edit_cut);
         _popupMenu.add(popup_edit_copy);
         _popupMenu.add(popup_edit_paste);
-        _popupMenu.addSeparator();
+        _popupMenu.addSeparator();        
         _popupMenu.add(popup_edit_selectall);
+        _popupMenu.addSeparator();
+        _popupMenu.add(popup_edit_user);
+        _popupMenu.add(popup_edit_time);
         _popupMenu.addSeparator();
         _popupMenu.add(popup_edit_changecase);
         _popupMenu.addSeparator();
@@ -693,22 +751,6 @@ public final class EditorWindow extends JFrame
         toolbar_saveas.setToolTipText("Save As (F2)");
         toolbar_saveas.addActionListener(new ToolBarButtonsAction("saveas"));
 
-        JButton toolbar_cut = new JButton(new ImageIcon(this.getClass().getResource("resources/cut.png"), "Cut"));
-        toolbar_cut.setToolTipText("Cut (CTRL+X)");
-        toolbar_cut.addActionListener(new ToolBarButtonsAction("cut"));
-
-        JButton toolbar_copy = new JButton(new ImageIcon(this.getClass().getResource("resources/copy.png"), "Copy"));
-        toolbar_copy.setToolTipText("Copy (CTRL+C)");
-        toolbar_copy.addActionListener(new ToolBarButtonsAction("copy"));
-
-        JButton toolbar_paste = new JButton(new ImageIcon(this.getClass().getResource("resources/paste.png"), "Paste"));
-        toolbar_paste.setToolTipText("Paste (CTRL+V)");
-        toolbar_paste.addActionListener(new ToolBarButtonsAction("paste"));
-
-        JButton toolbar_goto = new JButton(new ImageIcon(this.getClass().getResource("resources/goto.png"), "Goto"));
-        toolbar_goto.setToolTipText("GoTo (CTRL+G)");
-        toolbar_goto.addActionListener(new ToolBarButtonsAction("goto"));
-
         JButton toolbar_font = new JButton(new ImageIcon(this.getClass().getResource("resources/font.png"), "Font"));
         toolbar_font.setToolTipText("Set Font (ALT+F)");
         toolbar_font.addActionListener(new ToolBarButtonsAction("font"));
@@ -723,18 +765,75 @@ public final class EditorWindow extends JFrame
         _toolbar.addSeparator(new Dimension(4,4));
         _toolbar.add(toolbar_save);
         _toolbar.add(toolbar_saveas);
-        _toolbar.addSeparator(new Dimension(6,6));
-        _toolbar.add(toolbar_cut);
-        _toolbar.add(toolbar_copy);
-        _toolbar.add(toolbar_paste);
-        _toolbar.add(toolbar_goto);
         _toolbar.addSeparator(new Dimension(6, 6));
         _toolbar.add(toolbar_font);
         _toolbar.add(toolbar_help);
         
         ribbon.tape.put("Edit", new JToolBar());
         ribbon.add("Edit", ribbon.tape.get("Edit"));
+        JToolBar _toolbar2 = ribbon.tape.get("Edit");
+        
+        JButton toolbar2_cut = new JButton(new ImageIcon(this.getClass().getResource("resources/cut.png"), "Cut"));
+        toolbar2_cut.setToolTipText("Cut (CTRL+X)");
+        toolbar2_cut.addActionListener(new ToolBarButtonsAction("cut"));
+
+        JButton toolbar2_copy = new JButton(new ImageIcon(this.getClass().getResource("resources/copy.png"), "Copy"));
+        toolbar2_copy.setToolTipText("Copy (CTRL+C)");
+        toolbar2_copy.addActionListener(new ToolBarButtonsAction("copy"));
+
+        JButton toolbar2_paste = new JButton(new ImageIcon(this.getClass().getResource("resources/paste.png"), "Paste"));
+        toolbar2_paste.setToolTipText("Paste (CTRL+V)");
+        toolbar2_paste.addActionListener(new ToolBarButtonsAction("paste"));
+
+        JButton toolbar2_goto = new JButton(new ImageIcon(this.getClass().getResource("resources/goto.png"), "Goto"));
+        toolbar2_goto.setToolTipText("GoTo (CTRL+G)");
+        toolbar2_goto.addActionListener(new ToolBarButtonsAction("goto"));
+        
+        JButton toolbar2_undo = new JButton(new ImageIcon(this.getClass().getResource("resources/undo.png")));
+        toolbar2_undo.setToolTipText("Undo (CTRL+Z)");
+        toolbar2_undo.addActionListener(undoAction);
+        
+        JButton toolbar2_redo = new JButton(new ImageIcon(this.getClass().getResource("resources/redo.png")));
+        toolbar2_redo.setToolTipText("Redo (CTRL+Z)");
+        toolbar2_redo.addActionListener(redoAction);
+        
+        JButton toolbar2_user=new JButton(new ImageIcon(this.getClass().getResource("resources/user.png"), "User"));
+        toolbar2_user.setToolTipText("Insert username");
+        toolbar2_user.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(System.getProperty("user.name"), textPane.getCaretPosition());
+        	}
+        });        
+        
+        JButton toolbar2_time=new JButton(new ImageIcon(this.getClass().getResource("resources/time.png"), "Time"));
+        toolbar2_time.setToolTipText("Insert current timestamp");
+        toolbar2_time.addActionListener((e) -> {
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+        	if(sel != -1) {
+        		JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+        		textPane.insert(new SimpleDateFormat("dd/MM/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime()), textPane.getCaretPosition());
+        	}
+        });    
+        
+        _toolbar2.add(toolbar2_cut);
+        _toolbar2.add(toolbar2_copy);
+        _toolbar2.add(toolbar2_paste);
+        _toolbar2.add(toolbar2_goto);
+        _toolbar2.addSeparator(new Dimension(6,6));
+        _toolbar2.add(toolbar2_undo);
+        _toolbar2.add(toolbar2_redo);
+        _toolbar2.addSeparator(new Dimension(6,6));
+        _toolbar2.add(toolbar2_user);
+        _toolbar2.add(toolbar2_time);
+        
         ribbon.updateRibbon();
+        
+        
+        
         
         // add item to this
         ////////////////////////////////////////////////////////
@@ -750,13 +849,16 @@ public final class EditorWindow extends JFrame
 
 
         //**************************************************************
-        //get content pane & adding toolbar,statusbar & jsplit to it
+        //get content pane & adding ribbon,statusbar, mp & jsplit to it
         //***************************************************************
         Container cp=getContentPane();
-        cp.add(ribbon,BorderLayout.NORTH);
+        
+        JPanel panel = new JPanel();
+        
+        // cp.add(mp, BorderLayout.NORTH);
+        cp.add(ribbon,BorderLayout.PAGE_START);
         cp.add(statusBar,BorderLayout.SOUTH);
         cp.add(jsplit);
-
 
     }
 
@@ -2163,6 +2265,7 @@ class Window_MenuItemsAction implements ActionListener
            else if(_tabbedPane.getSelectedIndex()<tabindex)
             {
                 _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex()+1);
+                _list.setSelectedIndex(tabindex);
             }
         }
     }
@@ -2182,6 +2285,7 @@ class Window_MenuItemsAction implements ActionListener
             else
             {
                 _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex()-1);
+                _list.setSelectedIndex(tabcount);
             }
         }
     }

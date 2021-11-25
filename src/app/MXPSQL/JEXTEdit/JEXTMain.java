@@ -33,7 +33,7 @@ public class JEXTMain{
 	
 	public static void run() {
 		EventQueue.invokeLater(() -> {
-			editwin = new EditorWindow(viewPath);
+			editwin = new EditorWindow(viewPath, ns);
 			editwin.setSize(680, 680);
 			editwin.setLocationRelativeTo(null);
 			editwin.setVisible(true);
@@ -111,7 +111,7 @@ public class JEXTMain{
 		
         if(!isDirectory(JarPath)) {
         	if(!new File( Paths.get(cwd).resolve("MXPSQL").resolve("JEXTEdit").resolve("resources").resolve("unused").resolve("toestrap.jpg").toString() ).exists()) {
-        		JOptionPane.showMessageDialog(win, "Please wait while we extract our assets. It will begin once you close this dialog. Once we are done extracting, we will show the window.");
+        		JOptionPane.showMessageDialog(win, "Please wait while we extract our resources. It will begin once you close this dialog. Once we are done extracting, we will show the window.");
         		win.dispose();
             	if(!unzipJar()) {
             		System.exit(0);

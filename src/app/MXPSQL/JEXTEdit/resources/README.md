@@ -1,0 +1,1 @@
+The resources for the images lives here, Goku is somewhere, so where's Goku?

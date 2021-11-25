@@ -1,0 +1,1 @@
+Configuration here, XML with JAXB or Jakarta XML Binding

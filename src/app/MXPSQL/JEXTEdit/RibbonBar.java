@@ -25,8 +25,6 @@ public class RibbonBar extends JTabbedPane {
         
         
         add("Main", _toolbar);
-        
-        updateRibbon();
 	}
 	
 	public void updateRibbon() {

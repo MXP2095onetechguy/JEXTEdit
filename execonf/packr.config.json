@@ -1,0 +1,18 @@
+{
+    "platform": "windows64",
+    "jdk": "Your JDK",
+    "executable": "JEXTEdit",
+    "classpath": [
+        "bin/JextEdit.jar"
+    ],
+    "removelibs": [
+    ],
+    "mainclass": "MXPSQL.JEXTEdit.JEXTMain",
+    "vmargs": [    ],
+    "resources": [
+        "src/app/MXPSQL/JEXTEdit/resources",
+        "src/app/MXPSQL/JEXTEdit/resources"
+    ],
+    "minimizejre": "soft",
+    "output": "out-packr"
+}

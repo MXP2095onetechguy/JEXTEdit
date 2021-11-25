@@ -33,6 +33,9 @@ import MXPSQL.JEXTEdit.EditorWindow.ToolBarButtonsAction;
 //////////////////////////////////////////////////////////////////////////////
 public final class EditorWindow extends JFrame
 {
+	
+	ImageIcon liico;
+	Image lico;
 
     JMenuBar mb;
 
@@ -105,6 +108,11 @@ public final class EditorWindow extends JFrame
     // create constructor of TabbedNotepad class
     public EditorWindow(String viewp, Namespace nss)
     {
+    	
+    	liico = new ImageIcon(this.getClass().getResource("resources/logo.png"));
+    	lico = liico.getImage();
+    	
+    	setIconImage(lico);
     	
     	ns = nss;
     	

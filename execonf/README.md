@@ -1,0 +1,1 @@
+This is not the conf directory for the Jar, this is the conf directory for Jar packers

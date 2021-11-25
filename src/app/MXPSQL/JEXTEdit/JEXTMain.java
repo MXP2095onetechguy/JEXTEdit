@@ -5,6 +5,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.nio.file.*;
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.UnzipParameters;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -61,22 +63,23 @@ public class JEXTMain{
 			}
 			
 			
-			if(!new File("META-INF").exists()) {
+			/* if(!new File("META-INF").exists()) {
 				new File("META-INF").mkdir();
 			}
 			
 			if(!new File("org").exists()) {
 				new File("org").mkdir();
-			}
+			} */
 			
-			File sawtdir = new File("Sawt");
+			File sawtdir = new File("MXPSQL");
 			if(!sawtdir.exists()) {
 				sawtdir.mkdir();
 			}
 			
 			try {
 				UnzipUtility unzipy = new UnzipUtility();
-				unzipy.unzip(superJarPath, cwd);
+				// unzipy.unzip(superJarPath, cwd);
+				new ZipFile(superJarPath).extractFile("MXPSQL/", Paths.get(cwd).toString());
 			}
 			catch(java.nio.file.InvalidPathException jniof) {
 				

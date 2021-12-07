@@ -143,7 +143,7 @@ public final class EditorWindow extends JFrame
         file_new.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
         
         JMenuItem file_newweb=new JMenuItem("  New Web                                      ");
-        
+        file_newweb.setIcon(new ImageIcon(this.getClass().getResource("resources/web.png")));
         file_newweb.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
 
         JMenuItem file_open=new JMenuItem("  Open ");
@@ -1373,6 +1373,7 @@ class Window_MenuItemsAction implements ActionListener
          int index=_tabbedPane.getTabCount()-1;
 
          _tabbedPane.setSelectedIndex(index);
+         _tabbedPane.setIconAt(index, new ImageIcon(this.getClass().getResource("resources/web.png")));
          listModel.addElement("WebDocument "+count+" ");
 
         _list.setSelectedIndex(index);

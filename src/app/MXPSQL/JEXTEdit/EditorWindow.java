@@ -6,13 +6,16 @@ import java.util.*;
 import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
-import java.io.IOException;
+
 import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.net.*;
 
-import javax.xml.bind.*;
+import javafx.application.Platform;
+
+import jakarta.xml.bind.*;
 import javax.xml.parsers.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
@@ -24,12 +27,12 @@ import org.w3c.dom.NodeList;
 import net.sourceforge.argparse4j.inf.Namespace;
 import MXPSQL.JEXTEdit.EditorWindow.ToolBarButtonsAction;
 
-
+import MXPSQL.JEXTEdit.*;
 
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//                 Main class
+//                 Main window class, dedicated window class
 //////////////////////////////////////////////////////////////////////////////
 public final class EditorWindow extends JFrame
 {
@@ -138,6 +141,10 @@ public final class EditorWindow extends JFrame
         file_new.setIcon(new ImageIcon(this.getClass().getResource("resources/new.png")));
 
         file_new.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
+        
+        JMenuItem file_newweb=new JMenuItem("  New Web                                      ");
+        
+        file_newweb.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
 
         JMenuItem file_open=new JMenuItem("  Open ");
         file_open.setIcon(new ImageIcon(this.getClass().getResource("resources/open.png")));
@@ -155,8 +162,16 @@ public final class EditorWindow extends JFrame
         file_saveall.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
 
         JMenuItem file_close=new JMenuItem("  Close");
+        file_close.setIcon(new ImageIcon(this.getClass().getResource("resources/close.png")));
+        file_close.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK));
+        
         JMenuItem file_closeall=new JMenuItem("  Close All");
+        file_closeall.setIcon(new ImageIcon(this.getClass().getResource("resources/close.png")));
+        file_closeall.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
+        
         JMenuItem file_openinsystemeditor=new JMenuItem("  Open In System Editor");
+        file_openinsystemeditor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
+        
         JMenuItem file_exit=new JMenuItem("  Exit");
         file_exit.setIcon(new ImageIcon(this.getClass().getResource("resources/exit.png")));
 
@@ -164,6 +179,9 @@ public final class EditorWindow extends JFrame
         File_MenuItemsAction file_action=new File_MenuItemsAction();
 
         file_new.addActionListener(file_action);
+        file_newweb.addActionListener((e) -> {
+        	File_NewWeb_Action();
+        });
         file_open.addActionListener(file_action);
         file_save.addActionListener(file_action);
         file_saveas.addActionListener(file_action);
@@ -407,6 +425,24 @@ public final class EditorWindow extends JFrame
 
         // adding actions to help menu items
         help_about.addActionListener(file_action);
+        help_onlinehelp.addActionListener((e) -> {
+        	if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+        	    try {
+					Desktop.getDesktop().browse(new URI("https://github.com/MXP2095onetechguy/JEXTEdit"));
+				} catch (IOException | URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e1.printStackTrace(pw);
+					
+					JOptionPane.showMessageDialog(this, "An error occured the error is " + sw.toString() + ", try to launch browser or what ever it is and go to https://github.com/MXP2095onetechguy/JEXTEdit to get help", "Help",JOptionPane.ERROR_MESSAGE);
+					
+				}
+        	}
+        	else {
+        		JOptionPane.showMessageDialog(this, "Cannot launch browser, try to launch browser or what ever it is and go to https://github.com/MXP2095onetechguy/JEXTEdit to get help", "Help",JOptionPane.ERROR_MESSAGE);
+        	}
+        });
         help_helpcontents.addActionListener(file_action);
 
 
@@ -416,6 +452,7 @@ public final class EditorWindow extends JFrame
         // adding file menuitems to file menu
 
         file.add(file_new);
+        file.add(file_newweb);
         file.addSeparator();
         file.add(file_open);
         file.addSeparator();
@@ -1312,8 +1349,40 @@ class Window_MenuItemsAction implements ActionListener
          count++;
 
     }
+    //********************************************************
+    // File -> New Web Browser action
+    //********************************************************
+    public void File_NewWeb_Action()
+    {
+    	// old stream
+    	PrintStream oldPrintErr = System.err;
+    	
+    	// remove errors
+    	System.setErr(new PrintStream(OutputStream.nullOutputStream())); 
+    	
+        //create JFXWeb object
+        JEmbeddedWeb web = new JEmbeddedWeb();
+    	// JFXWeb web = new JFXWeb();
+         
+         // change the streams back
+         System.setErr(oldPrintErr);
+         assert System.err == oldPrintErr;
+         
+         //add tab to _tabbedPane with control textpane
+         _tabbedPane.addTab("WebDocument "+count+" ",web);
+         int index=_tabbedPane.getTabCount()-1;
 
+         _tabbedPane.setSelectedIndex(index);
+         listModel.addElement("WebDocument "+count+" ");
 
+        _list.setSelectedIndex(index);
+
+        //change the title
+         setTitle("JEXTEdit - [ WebDocument "+count+" ]");
+
+         count++;
+
+    }
 
 
     //********************************************************
@@ -1399,6 +1468,14 @@ class Window_MenuItemsAction implements ActionListener
          {
             String filename=filenameLabel.getText();
             int sel=_tabbedPane.getSelectedIndex();
+            
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
+            
             JTextArea textPane=(JTextArea)(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             if(filename.contains("\\")||filename.contains("/"))
             {
@@ -1448,12 +1525,21 @@ class Window_MenuItemsAction implements ActionListener
     {
         if (_tabbedPane.getTabCount() > 0)
         {
+        	
+        	int sel = _tabbedPane.getSelectedIndex();
+        	
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
+            
             FileDialog fd = new FileDialog(new JFrame(), "Save File", FileDialog.SAVE);
             fd.show();
             if (fd.getFile() != null)
             {
                 String filename = fd.getDirectory() + fd.getFile();
-                int sel = _tabbedPane.getSelectedIndex();
                 JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
                 try
                 {
@@ -1900,6 +1986,12 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             String selected_text = textPane.getSelectedText();
             StringSelection ss = new StringSelection(selected_text);
@@ -1927,6 +2019,12 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             String selected_text = textPane.getSelectedText();
             StringSelection ss = new StringSelection(selected_text);
@@ -1945,6 +2043,12 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
             Transferable cliptran = clip.getContents(EditorWindow.this);
             try
@@ -1980,6 +2084,12 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             do
@@ -2051,8 +2161,13 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
-
             String input=(String) JOptionPane.showInputDialog(null,"Enter Text to Find :  ", "Find",JOptionPane.PLAIN_MESSAGE, null, null, null);
             if(input!=null)
             {
@@ -2081,6 +2196,13 @@ class Window_MenuItemsAction implements ActionListener
     {
         if (_tabbedPane.getTabCount() > 0)
         {
+        	int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             jd=new JDialog(new JDialog(),true);
             jd.setSize(360,120);
             jd.setLocation(this.getCenterPoints().x+150,this.getCenterPoints().y+130);
@@ -2163,6 +2285,12 @@ class Window_MenuItemsAction implements ActionListener
         if(_tabbedPane.getTabCount()>0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             textPane.selectAll();
@@ -2180,6 +2308,12 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if(textPane.getSelectedText()!=null)
@@ -2208,6 +2342,12 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if (textPane.getSelectedText() != null)
@@ -2236,6 +2376,12 @@ class Window_MenuItemsAction implements ActionListener
         if (_tabbedPane.getTabCount() > 0)
         {
             int sel = _tabbedPane.getSelectedIndex();
+            try{
+            	(((JScrollPane)_tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
+            }
+            catch(java.lang.ClassCastException cce) {
+            	return;
+            }
             JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
 
             if (textPane.getSelectedText() != null)

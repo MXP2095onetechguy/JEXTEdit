@@ -7,6 +7,7 @@ import MXPSQL.JEXTEdit.EditorWindow.ToolBarButtonsAction;
 import java.awt.*;
 import java.util.*;
 
+// public class RibbonBar extends JTabbedPane {
 public class RibbonBar extends JTabbedPane {
 	public Map<String, JToolBar> tape = new HashMap<String, JToolBar>();
 	

@@ -58,7 +58,9 @@ import java.text.SimpleDateFormat;
 import java.net.*;
 
 import javafx.application.Platform;
-
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.control.ProgressBar;
 import jakarta.xml.bind.*;
 import javax.xml.parsers.*;
 import javax.swing.text.*;
@@ -93,7 +95,9 @@ public final class EditorWindow extends JFrame
     JList _list;
 
     DefaultListModel listModel;
-
+    
+    JPanel spanel;
+    ProgressBar progressBar;
     JToolBar statusBar;
 
     JLabel readylabel;
@@ -687,6 +691,10 @@ public final class EditorWindow extends JFrame
         ///////////////////////////////////////
         //set JMenubar
         setJMenuBar(mb);
+        
+        ///////////////////////////////////////
+        //make the status panel for progressbar
+        spanel = new JPanel();
 
 
 
@@ -722,10 +730,10 @@ public final class EditorWindow extends JFrame
         ///////////////////////////////////////////////////
         //set visibility to status strip
         if (isStatusStrip.equals("true")) {
-            statusBar.setVisible(true);
+            spanel.setVisible(true);
             view_statusstrip.setSelected(true);
         } else {
-            statusBar.setVisible(false);
+            spanel.setVisible(false);
             view_statusstrip.setSelected(false);
         }
         
@@ -938,15 +946,53 @@ public final class EditorWindow extends JFrame
 
 
         //**************************************************************
-        //get content pane & adding ribbon,statusbar, mp & jsplit to it
+        //get content pane & adding ribbon,spanel & jsplit to it
         //***************************************************************
         Container cp=getContentPane();
         
-        JPanel panel = new JPanel();
+        // add the progressbar and status bar before adding the spanel
+        GridBagLayout gbl = new GridBagLayout();
+        spanel.setLayout(gbl);
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        
+        gbc.weightx = gbc.weighty = 1.0;
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        
+        gbc.gridy = 0;
+        
+    	// old stream
+    	PrintStream oldPrintErr = System.err;
+    	
+    	// remove errors
+    	System.setErr(new PrintStream(OutputStream.nullOutputStream()));
+        
+        JFXPanel pane = new JFXPanel();
+        
+        // change the streams back
+        System.setErr(oldPrintErr);
+        assert System.err == oldPrintErr;
+        
+        spanel.add(pane, gbc);
+        
+        
+        
+        gbc.gridy = 1;
+        
+        spanel.add(statusBar, gbc);
+        
+        // add the progressbar to javafx
+        progressBar = new ProgressBar(0);
+        
+        Scene scene = new Scene(progressBar);
+        scene.getStylesheets().add("css/statusstrip.css");
+        
+        pane.setScene(scene);
         
         // cp.add(mp, BorderLayout.NORTH);
         cp.add(ribbon,BorderLayout.PAGE_START);
-        cp.add(statusBar,BorderLayout.SOUTH);
+        cp.add(spanel,BorderLayout.SOUTH);
         cp.add(jsplit);
 
     }
@@ -1400,7 +1446,7 @@ class Window_MenuItemsAction implements ActionListener
     {
     	// old stream
     	PrintStream oldPrintErr = System.err;
-    	
+    	Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS));    	
     	// remove errors
     	System.setErr(new PrintStream(OutputStream.nullOutputStream())); 
     	
@@ -1426,7 +1472,8 @@ class Window_MenuItemsAction implements ActionListener
          setTitle("JEXTEdit - [ WebDocument "+count+" ]");
 
          count++;
-
+         
+         Platform.runLater(() -> progressBar.setProgress(0)); 
     }
 
 
@@ -1435,6 +1482,7 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     public void File_Open_Action()
     {
+    	
          FileDialog fd = new FileDialog(new JFrame(), "Select File",FileDialog.LOAD);
          fd.setMultipleMode(true);
          fd.show();
@@ -1476,7 +1524,8 @@ class Window_MenuItemsAction implements ActionListener
                setTitle("JEXTEdit - [ "+file+" ]");
                filenameLabel.setText(filename);
                filesHoldListModel.addElement(filename);
-
+               
+               Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS)); 
                BufferedReader d;
                StringBuffer sb = new StringBuffer();
                try
@@ -1498,6 +1547,8 @@ class Window_MenuItemsAction implements ActionListener
 
                }
            }
+         
+         Platform.runLater(() -> progressBar.setProgress(0)); 
 
     }
 
@@ -1509,6 +1560,7 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     public void File_Save_Action()
     {
+    	
          if(_tabbedPane.getTabCount()>0)
          {
             String filename=filenameLabel.getText();
@@ -1527,6 +1579,7 @@ class Window_MenuItemsAction implements ActionListener
               File f=new File(filename);
               if(f.exists())
               {
+            	  Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS)); 
                   try
                   {
                        DataOutputStream d = new DataOutputStream(new FileOutputStream(filename));
@@ -1557,7 +1610,8 @@ class Window_MenuItemsAction implements ActionListener
                     File_SaveAs_Action();
             }
 
-         }
+         }Platform.runLater(() -> progressBar.setProgress(0)); 
+         
     }
 
 
@@ -1568,6 +1622,7 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     public void File_SaveAs_Action()
     {
+    	
         if (_tabbedPane.getTabCount() > 0)
         {
         	
@@ -1584,6 +1639,7 @@ class Window_MenuItemsAction implements ActionListener
             fd.show();
             if (fd.getFile() != null)
             {
+            	Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS)); 
                 String filename = fd.getDirectory() + fd.getFile();
                 JTextArea textPane = (JTextArea) (((JScrollPane) _tabbedPane.getComponentAt(sel)).getViewport()).getComponent(0);
                 try
@@ -1612,6 +1668,7 @@ class Window_MenuItemsAction implements ActionListener
 
             }
         }
+        Platform.runLater(() -> progressBar.setProgress(0)); 
     }
 
 
@@ -1622,6 +1679,7 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     public void File_SaveAll_Action()
     {
+    	
         if (_tabbedPane.getTabCount() > 0)
         {
             int maxindex = _tabbedPane.getTabCount() - 1;
@@ -1638,6 +1696,7 @@ class Window_MenuItemsAction implements ActionListener
                     {
                         try
                         {
+                        	Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS)); 
                             DataOutputStream d = new DataOutputStream(new FileOutputStream(filename));
                             String line = textPane.getText();
                             d.writeBytes(line);
@@ -1662,6 +1721,8 @@ class Window_MenuItemsAction implements ActionListener
 
             }
         }
+        
+        Platform.runLater(() -> progressBar.setProgress(0)); 
     }
 
 
@@ -2676,12 +2737,12 @@ class Window_MenuItemsAction implements ActionListener
         {
             if (jcbmi.isSelected())
             {
-               statusBar.setVisible(true);
+               spanel.setVisible(true);
                 ReplaceViewsFileNodeText("statusStrip", "false", "true");
             }
             else
             {
-                statusBar.setVisible(false);
+                spanel.setVisible(false);
                 ReplaceViewsFileNodeText("statusStrip", "true", "false");
             }
         }

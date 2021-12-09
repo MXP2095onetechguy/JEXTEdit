@@ -277,6 +277,7 @@ public final class EditorWindow extends JFrame
 
         JMenuItem edit_find = new JMenuItem("  Find");
         edit_find.setIcon(new ImageIcon(this.getClass().getResource("resources/find.png")));
+        edit_find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,ActionEvent.CTRL_MASK));
 
          JMenuItem edit_replace = new JMenuItem("  Replace");
 
@@ -835,6 +836,10 @@ public final class EditorWindow extends JFrame
         JButton toolbar_new=new JButton(new ImageIcon(this.getClass().getResource("resources/new.png"), "New"));
         toolbar_new.setToolTipText("New (CTRL+N)");
         toolbar_new.addActionListener(new ToolBarButtonsAction("new"));
+        
+        JButton toolbar_newweb=new JButton(new ImageIcon(this.getClass().getResource("resources/web.png"), "New Web"));
+        toolbar_newweb.setToolTipText("New Webkit web browser (CTRL+N+SHIFT)");
+        toolbar_newweb.addActionListener((e) -> File_NewWeb_Action());
 
         JButton toolbar_open = new JButton(new ImageIcon(this.getClass().getResource("resources/open.png"), "Open"));
         toolbar_open.setToolTipText("Open (CTRL+O)");
@@ -986,11 +991,10 @@ public final class EditorWindow extends JFrame
         progressBar = new ProgressBar(0);
         
         Scene scene = new Scene(progressBar);
-        scene.getStylesheets().add("css/statusstrip.css");
+        scene.getStylesheets().add(this.getClass().getResource("css/statusstrip.css").toString());
         
         pane.setScene(scene);
         
-        // cp.add(mp, BorderLayout.NORTH);
         cp.add(ribbon,BorderLayout.PAGE_START);
         cp.add(spanel,BorderLayout.SOUTH);
         cp.add(jsplit);

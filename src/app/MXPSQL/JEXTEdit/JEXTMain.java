@@ -230,8 +230,16 @@ public class JEXTMain{
         // sun.awt.xembedserver workaround, run if linux
         if(SystemUtils.IS_OS_LINUX) {
         	System.setProperty("sun.awt.xembedserver", "true");
+        	assert System.getProperty("sun.awt.xembedserver") == "true";
         }
         
-		run();
+		try {
+			run();
+		}
+		catch(Exception e) {
+			System.out.println("Time to crash, an error had occured");
+			e.printStackTrace(System.err);
+			System.exit(-21);
+		}
 	}
 }

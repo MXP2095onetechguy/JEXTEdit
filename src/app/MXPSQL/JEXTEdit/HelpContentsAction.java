@@ -45,22 +45,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 import java.awt.*;
-
-
 import javax.swing.*;
+
+
 public class HelpContentsAction extends JFrame
 {
     Image image;
   public HelpContentsAction()
   {
       Container cp=getContentPane();
-      JLabel lb=new JLabel("JEXTEdit");
+      JLabel lb=new JLabel("JEXTEdit or Java-EXT Edit");
       lb.setFont(new Font("SansSerif",Font.PLAIN,22));
 
       JPanel jp=new JPanel();
       jp.add(lb, BorderLayout.PAGE_START);
       
-      JLabel lb2 = new JLabel("Very Nice MIT and 'LGPL 2.1 or any later version' Licensed editor.");
+      JLabel lb2 = new JLabel("Very Nice MIT and 'LGPL 2.1 or any later version' Licensed editor.\n Built with Swing and JavaFX in Java11");
       jp.add(lb2, BorderLayout.CENTER);
 
       cp.add(jp,BorderLayout.NORTH);

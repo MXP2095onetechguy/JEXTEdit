@@ -1,5 +1,6 @@
 # JEXTEdit
 
+JEXTEdit (Java-EXT Edit)
 
 Good Java Text Editor, made using eclipse.
 

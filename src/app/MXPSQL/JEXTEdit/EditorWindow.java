@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import java.awt.*;
 import javax.swing.*;
+import java.awt.dnd.*;
 import java.io.*;
 import java.util.*;
 import java.awt.event.*;
@@ -55,7 +56,6 @@ import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.net.*;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -65,6 +65,7 @@ import jakarta.xml.bind.*;
 import javax.xml.parsers.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -197,6 +198,9 @@ public final class EditorWindow extends JFrame
         JMenuItem file_open=new JMenuItem("  Open ");
         file_open.setIcon(new ImageIcon(this.getClass().getResource("resources/open.png")));
         file_open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+        
+        JMenuItem file_openwebrq = new JMenuItem("  Open From Web");
+        file_openwebrq.setIcon(new ImageIcon(this.getClass().getResource("resources/webrq.png")));
 
         JMenuItem file_save=new JMenuItem("  Save ");
         file_save.setIcon(new ImageIcon(this.getClass().getResource("resources/save.png")));
@@ -214,7 +218,7 @@ public final class EditorWindow extends JFrame
         file_close.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK));
         
         JMenuItem file_closeall=new JMenuItem("  Close All");
-        file_closeall.setIcon(new ImageIcon(this.getClass().getResource("resources/close.png")));
+        file_closeall.setIcon(new ImageIcon(this.getClass().getResource("resources/closeall.png")));
         file_closeall.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
         
         JMenuItem file_openinsystemeditor=new JMenuItem("  Open In System Editor");
@@ -231,6 +235,9 @@ public final class EditorWindow extends JFrame
         	File_NewWeb_Action();
         });
         file_open.addActionListener(file_action);
+        file_openwebrq.addActionListener((e) -> {
+        	File_Open_WebRq_Action();
+        });
         file_save.addActionListener(file_action);
         file_saveas.addActionListener(file_action);
         file_saveall.addActionListener(file_action);
@@ -504,6 +511,7 @@ public final class EditorWindow extends JFrame
         file.add(file_newweb);
         file.addSeparator();
         file.add(file_open);
+        file.add(file_openwebrq);
         file.addSeparator();
         file.add(file_save);
         file.add(file_saveas);
@@ -844,6 +852,12 @@ public final class EditorWindow extends JFrame
         JButton toolbar_open = new JButton(new ImageIcon(this.getClass().getResource("resources/open.png"), "Open"));
         toolbar_open.setToolTipText("Open (CTRL+O)");
         toolbar_open.addActionListener(new ToolBarButtonsAction("open"));
+        
+        JButton toolbar_open_webrq = new JButton(new ImageIcon(this.getClass().getResource("resources/webrq.png"), "Open From Web"));
+        toolbar_open_webrq.setToolTipText("Open from websites with WebRequest");
+        toolbar_open_webrq.addActionListener((e) -> {
+        	File_Open_WebRq_Action();
+        });
 
         JButton toolbar_save = new JButton(new ImageIcon(this.getClass().getResource("resources/save.png"), "Save"));
         toolbar_save.setToolTipText("Save (CTRL+S)");
@@ -864,6 +878,7 @@ public final class EditorWindow extends JFrame
         _toolbar.add(toolbar_new);
         _toolbar.addSeparator(new Dimension(4,4));
         _toolbar.add(toolbar_open);
+        _toolbar.add(toolbar_open_webrq);
         _toolbar.addSeparator(new Dimension(4,4));
         _toolbar.add(toolbar_save);
         _toolbar.add(toolbar_saveas);
@@ -998,7 +1013,128 @@ public final class EditorWindow extends JFrame
         cp.add(ribbon,BorderLayout.PAGE_START);
         cp.add(spanel,BorderLayout.SOUTH);
         cp.add(jsplit);
+        
+        new DropTarget(this, new FileDND());
+        new DropTarget(cp, new FileDND());
+        new DropTarget(jsplit, new FileDND());
+        new DropTarget(ribbon, new FileDND());
+        new DropTarget(spanel, new FileDND());
 
+    }
+    
+    class FileDND implements DropTargetListener{
+
+		@Override
+		public void dragEnter(DropTargetDragEvent dtde) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dragOver(DropTargetDragEvent dtde) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dropActionChanged(DropTargetDragEvent dtde) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dragExit(DropTargetEvent dte) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+        public synchronized void drop(DropTargetDropEvent dtde) {
+			dtde.acceptDrop(DnDConstants.ACTION_COPY);
+			
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                java.util.List<File> droppedFiles = (java.util.List<File>)
+                    dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                for (File filefs : droppedFiles) {
+                    // process files
+                	String filename=filefs.toString();
+                    String file=filename;
+                    if(filename.contains("\\")){
+                        file = filename.substring(filename.lastIndexOf("\\") + 1);
+                    }
+                    else if(filename.contains("/")){
+                        file = filename.substring(filename.lastIndexOf("/") + 1);
+                    }
+                    
+                    StringBuilder sb = new StringBuilder();
+                    BufferedReader d;
+                    
+                    d = new BufferedReader(new FileReader(filename));
+                    String line;
+                    while((line=d.readLine())!=null)
+                             sb.append(line + "\n");
+                    System.out.println(sb.toString());
+                    d.close();
+                    
+                    open_from_string(sb.toString(), file);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    	
+    }
+    
+    
+    /**
+     * 
+     */
+    public void open_from_string(String str, String title) {
+    	
+        if (true)
+        {
+            //crerate textpane object
+            JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
+
+            _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
+
+            if(isDarkTheme){
+                _textPane.setBackground(new Color(10, 10, 20));
+                _textPane.setForeground(new Color(250, 250, 250));
+            }
+
+            JScrollPane jsp=new JScrollPane(_textPane);
+            // add key listener & Undoable edit listener to text pane
+            _textPane.addKeyListener(new KeyTypedAction());
+            _textPane.getDocument().addUndoableEditListener(_undoManager);
+            //add tab to _tabbedPane with control textpane
+            _tabbedPane.addTab(title + " ",jsp);
+            //add caret listener & mouse listener to text pane
+            _textPane.addCaretListener(new CaretAction());
+            _textPane.addMouseListener(new TextPane_MouseAction());
+            int index=_tabbedPane.getTabCount()-1;
+
+            _tabbedPane.setSelectedIndex(index);
+
+            // set save icon to added tab
+            _tabbedPane.setIconAt(index, new ImageIcon(this.getClass().getResource("resources/save.png")));
+            listModel.addElement(title);
+
+           _list.setSelectedIndex(index);
+
+           //change the title
+            setTitle("JEXTEdit - [ " + title + " ]");
+            filenameLabel.setText(title);
+            
+            _textPane.setText(str);
+
+            count++; 
+        
+          Platform.runLater(() -> progressBar.setProgress(0)); 
+
+
+        }	
     }
 
 
@@ -1125,7 +1261,7 @@ class Window_MenuItemsAction implements ActionListener
 
                     // adding Help -> About action here
                     case "About...." :
-                        JOptionPane.showMessageDialog(null,"JEXTedit, a very advanced Java Text Editor. Cool?","About....",JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(null,"JEXTedit (Java-EXT Edit), a very advanced Java Text Editor. Cool?","About....",JOptionPane.INFORMATION_MESSAGE);
                         break;
                 }
             }
@@ -1408,7 +1544,7 @@ class Window_MenuItemsAction implements ActionListener
     public void File_New_Action()
     {
         //crerate textpane object
-         JTextArea _textPane=new JTextArea();
+         JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
 
          _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
@@ -1506,7 +1642,7 @@ class Window_MenuItemsAction implements ActionListener
 
                int count=_tabbedPane.getTabCount();
 
-               JTextArea _textPane=new JTextArea();
+               JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
                _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
                if (isDarkTheme) {
@@ -1556,6 +1692,72 @@ class Window_MenuItemsAction implements ActionListener
 
     }
 
+
+    //********************************************************
+    // File -> Open From Web action
+    //********************************************************
+    public void File_Open_WebRq_Action()
+    {
+    	String url = JOptionPane.showInputDialog("What URL do you want to open?");
+    	
+         if (url!=null)
+         {
+               String  filename = url;
+               String file=filename;
+               if(filename.contains("\\")){
+                   file = filename.substring(filename.lastIndexOf("\\") + 1);
+               }
+               else if(filename.contains("/")){
+                   file = filename.substring(filename.lastIndexOf("/") + 1);
+               }
+
+               int count=_tabbedPane.getTabCount();
+
+               JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
+               _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
+
+               if (isDarkTheme) {
+                    _textPane.setBackground(new Color(10, 10, 20));
+                    _textPane.setForeground(new Color(250, 250, 250));
+                }
+
+               JScrollPane jsp=new JScrollPane(_textPane);
+               _textPane.addKeyListener(new KeyTypedAction());
+                _textPane.getDocument().addUndoableEditListener(_undoManager);
+                _textPane.addCaretListener(new CaretAction());
+                _textPane.addMouseListener(new TextPane_MouseAction());
+               _tabbedPane.addTab(file,jsp);
+               _tabbedPane.setSelectedIndex(count);
+               _tabbedPane.setIconAt(count, new ImageIcon(this.getClass().getResource("resources/save.png")));
+               listModel.addElement(file);
+               _list.setSelectedIndex(count);
+
+               setTitle("JEXTEdit - [ "+file+" ]");
+               filenameLabel.setText(filename);
+               filesHoldListModel.addElement(filename);
+               
+               Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS)); 
+               
+               java.net.http.HttpResponse<String> c = null;
+               
+               	try {
+               		c = WebHelper.getHTTPResponse(url);
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+               
+               if(c == null) {
+            	   _textPane.setText("");
+               }
+               else {
+            	   _textPane.setText(c.body());
+               }
+         
+         Platform.runLater(() -> progressBar.setProgress(0)); 
+
+         }
+    }
 
 
 

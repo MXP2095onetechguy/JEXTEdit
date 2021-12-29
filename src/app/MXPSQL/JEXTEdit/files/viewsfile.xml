@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <views>
-    <documentSelector>true</documentSelector>
-    <lookAndFeel>Nimbus</lookAndFeel>
+    <documentPane>true</documentPane>
     <statusStrip>true</statusStrip>
     <tabsAlignment>Top</tabsAlignment>
     <toolStrip>true</toolStrip>

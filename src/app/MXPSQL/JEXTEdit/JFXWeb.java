@@ -84,12 +84,20 @@ public class JFXWeb extends JFXPanel{
 	}
 	
 	public JFXWeb(boolean runlater, String weburl) {
-		Platform.runLater(() -> {
+		if(runlater) {
+			Platform.runLater(() -> {
+				webkit = new WebView();
+				setScene(new Scene(webkit));
+				engine = webkit.getEngine();
+				engine.load(weburl);
+			});
+		}
+		else {
 			webkit = new WebView();
 			setScene(new Scene(webkit));
 			engine = webkit.getEngine();
 			engine.load(weburl);
-		});
+		}
 	}
 	
 	public WebView getWebkit() {

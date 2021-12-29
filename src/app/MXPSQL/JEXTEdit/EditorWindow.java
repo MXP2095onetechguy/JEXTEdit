@@ -45,9 +45,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.dnd.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
@@ -57,13 +59,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
+import org.eclipse.swt.awt.SWT_AWT;
+
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextInputDialog;
 import jakarta.xml.bind.*;
 import javax.xml.parsers.*;
 import javax.swing.text.*;
+import javax.swing.tree.TreePath;
+
 import java.awt.datatransfer.*;
 
 import org.w3c.dom.Document;
@@ -76,13 +83,24 @@ import MXPSQL.JEXTEdit.EditorWindow.ToolBarButtonsAction;
 
 import MXPSQL.JEXTEdit.*;
 
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //                 Main window class, dedicated window class
 //////////////////////////////////////////////////////////////////////////////
-public final class EditorWindow extends JFrame
+public final class EditorWindow extends JPanel
 {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	JFrame parent;
+	Shell shell;
+	Display display;
 	
 	ImageIcon liico;
 	Image lico;
@@ -113,7 +131,7 @@ public final class EditorWindow extends JFrame
     JMenu windowMenu=new JMenu("Window");
 
     int count=1;
-    boolean isDarkTheme=false;
+    int webcount=1;
 
     DefaultListModel filesHoldListModel=new DefaultListModel();
 
@@ -158,26 +176,26 @@ public final class EditorWindow extends JFrame
 
 
     // create constructor of TabbedNotepad class
-    public EditorWindow(String viewp, Namespace nss)
+    public EditorWindow(JFrame prt, Display disp, String viewp, Namespace nss)
     {
+    	
+    	parent = prt;
+    	display = disp;
     	
     	liico = new ImageIcon(this.getClass().getResource("resources/logo.png"));
     	lico = liico.getImage();
     	
-    	setIconImage(lico);
+    	parent.setIconImage(lico);
     	
     	ns = nss;
     	
     	viewPath = viewp;
-        setTitle("JEXTEdit");
+        parent.setTitle("JEXTEdit");
         
         // setUndecorated(true);
 
 
         mb=new JMenuBar();
-
-
-        isDarkTheme = getNodeTextContent("lookAndFeel").equals("GlobalDark");
 
 
         //**********************************************
@@ -191,7 +209,7 @@ public final class EditorWindow extends JFrame
 
         file_new.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
         
-        JMenuItem file_newweb=new JMenuItem("  New Web                                      ");
+        JMenuItem file_newweb=new JMenuItem("  New Web browser                                      ");
         file_newweb.setIcon(new ImageIcon(this.getClass().getResource("resources/web.png")));
         file_newweb.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
 
@@ -223,6 +241,12 @@ public final class EditorWindow extends JFrame
         
         JMenuItem file_openinsystemeditor=new JMenuItem("  Open In System Editor");
         file_openinsystemeditor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK));
+
+        JMenuItem file_restart=new JMenuItem("  Restart");
+        file_restart.setIcon(new ImageIcon(this.getClass().getResource("resources/restart.png")));
+        
+        JMenuItem file_newwin=new JMenuItem("  New Window");
+        file_newwin.setIcon(new ImageIcon(this.getClass().getResource("resources/newwin.png")));
         
         JMenuItem file_exit=new JMenuItem("  Exit");
         file_exit.setIcon(new ImageIcon(this.getClass().getResource("resources/exit.png")));
@@ -236,7 +260,12 @@ public final class EditorWindow extends JFrame
         });
         file_open.addActionListener(file_action);
         file_openwebrq.addActionListener((e) -> {
-        	File_Open_WebRq_Action();
+        	Platform.runLater(new Runnable() {
+        		@Override
+        		public void run() {
+        			File_Open_WebRq_Action();
+        		}
+        	});
         });
         file_save.addActionListener(file_action);
         file_saveas.addActionListener(file_action);
@@ -244,6 +273,8 @@ public final class EditorWindow extends JFrame
         file_close.addActionListener(file_action);
         file_closeall.addActionListener(file_action);
         file_openinsystemeditor.addActionListener(file_action);
+        file_restart.addActionListener((e) -> {try {JEXTMain.runApplication(true);} catch (URISyntaxException | IOException e1) {e1.printStackTrace();}});
+        file_newwin.addActionListener((e) -> {try {JEXTMain.runApplication(false);} catch (URISyntaxException | IOException e1) {e1.printStackTrace();}});
         file_exit.addActionListener(file_action);
 
         //add MenuListener to menu items
@@ -386,25 +417,8 @@ public final class EditorWindow extends JFrame
         JCheckBoxMenuItem view_statusstrip=new JCheckBoxMenuItem("  Status Strip");
         view_statusstrip.setSelected(true);
 
-        JCheckBoxMenuItem view_documentselector = new JCheckBoxMenuItem("  Document Selector");
-        view_documentselector.setSelected(true);
-
-        JMenu view_lookandfeel=new JMenu("  Look and Feel  ");
-
-        JMenuItem view_lookandfeel_java=new JMenuItem("  Java  ");
-        JMenuItem view_lookandfeel_motif=new JMenuItem("  Motif  ");
-        JMenuItem view_lookandfeel_nimbus=new JMenuItem("  Nimbus  ");
-        JMenuItem view_lookandfeel_windows=new JMenuItem("  Windows  ");
-        JMenuItem view_lookandfeel_windowsclassic=new JMenuItem("  Windows Classic  ");
-        JMenuItem view_lookandfeel_globaldark = new JMenuItem("  Global Dark  ");
-
-
-        view_lookandfeel.add(view_lookandfeel_java);
-        view_lookandfeel.add(view_lookandfeel_motif);
-        view_lookandfeel.add(view_lookandfeel_nimbus);
-        view_lookandfeel.add(view_lookandfeel_windows);
-        view_lookandfeel.add(view_lookandfeel_windowsclassic);
-        view_lookandfeel.add(view_lookandfeel_globaldark);
+        JCheckBoxMenuItem view_documentpane = new JCheckBoxMenuItem("  Document Pane");
+        view_documentpane.setSelected(true);
 
         //adding actions to view menu items
         View_MenuItemsAction view_action=new View_MenuItemsAction();
@@ -416,14 +430,8 @@ public final class EditorWindow extends JFrame
         view_tabsalign_bottom.addActionListener(view_action);
         view_tabsalign_left.addActionListener(view_action);
         view_tabsalign_right.addActionListener(view_action);
-        view_lookandfeel_java.addActionListener(view_action);
-        view_lookandfeel_motif.addActionListener(view_action);
-        view_lookandfeel_nimbus.addActionListener(view_action);
-        view_lookandfeel_windows.addActionListener(view_action);
-        view_lookandfeel_windowsclassic.addActionListener(view_action);
-        view_lookandfeel_globaldark.addActionListener(view_action);
 
-        view_documentselector.addActionListener(new View_DocumentSelector_Action(view_documentselector));
+        view_documentpane.addActionListener(new View_DocumentPane_Action(view_documentpane));
 
         view_toolbar.addActionListener(new View_ToolBar_Action(view_toolbar));
         
@@ -522,6 +530,9 @@ public final class EditorWindow extends JFrame
         file.addSeparator();
         file.add(file_openinsystemeditor);
         file.addSeparator();
+        file.add(file_restart);
+        file.add(file_newwin);
+        file.addSeparator();
         file.add(file_exit);
 
         // add file menu to menu bar mb
@@ -572,9 +583,8 @@ public final class EditorWindow extends JFrame
         view.add(view_toolbar);
         view.add(view_statusstrip);
         view.addSeparator();
-        view.add(view_documentselector);
+        view.add(view_documentpane);
         view.addSeparator();
-        view.add(view_lookandfeel);
 
         //add view menu to mb
         mb.add(view);
@@ -604,10 +614,10 @@ public final class EditorWindow extends JFrame
 
 
         ////////////////////////////////////////////////////////////////////////
-        //set visibility of Document Selector,Status Strip,ToolStrip
+        //set visibility of ,Status Strip,ToolStrip
         // and Tabs Alignment when application starts by reading values from
         // a file files/viewsfile.xml
-        String isDocumentSelect = getNodeTextContent("documentSelector");
+        String isDocumentSelect = getNodeTextContent("documentPane");
         String isStatusStrip = getNodeTextContent("statusStrip");
         String isToolStrip = getNodeTextContent("toolStrip");
         String tabsAlign = getNodeTextContent("tabsAlignment");
@@ -619,6 +629,7 @@ public final class EditorWindow extends JFrame
         //***********************************************************************
         // create _tabbedPane object & adding ChangeListener interface to it
         //***********************************************************************
+         
          _tabbedPane=new JTabbedPane();
          _tabbedPane.setFont(new Font("Calibri",Font.PLAIN,14));
          _tabbedPane.addChangeListener(new TabChanged());
@@ -658,10 +669,6 @@ public final class EditorWindow extends JFrame
          _list=new JList(listModel);
          _list.setFont(new Font("Calibri",Font.PLAIN,14));
 
-         if(isDarkTheme){
-             _list.setBackground(new Color(10, 10, 20));
-         }
-
          _list.setMinimumSize(new Dimension(400,600));
          JScrollPane listpane=new JScrollPane(_list);
          _list.addListSelectionListener(new SelectTabFromListItem());
@@ -670,6 +677,74 @@ public final class EditorWindow extends JFrame
          // creating document tab pane & adding listpane object to it
          JTabbedPane documentPane=new JTabbedPane();
          documentPane.addTab(" Document Selector", listpane);
+         
+         
+         
+         //***************************************************************************
+         // Add a file browser
+         // put it on the documentpane
+         //*******************************************************************************
+         HashMap<String, File[]> fsmap = new HashMap<String, File[]>();
+         // fsmap.put("roots", File.listRoots());
+         fsmap.put("roots", null);
+         
+         fsmap.put("cwd", new File[] {new File(".")});
+         
+         
+         FBrowser docExView = new FBrowser(fsmap);
+         
+         JTree ftree = docExView.ftree;
+         
+ 		 MouseListener ml = new MouseAdapter() {
+		    public void mousePressed(MouseEvent e) {
+		        int selRow = ftree.getRowForLocation(e.getX(), e.getY());
+		        TreePath selPath = ftree.getPathForLocation(e.getX(), e.getY());
+		        if(selRow != -1) {
+		            if(e.getClickCount() == 2) {
+		            	Object node = selPath.getLastPathComponent();
+		            	File fnode;
+		            	try {
+		            		fnode = (File) node;
+		            	}
+		            	catch(Exception e1) {
+		            		e1.printStackTrace();
+		            		return;
+		            	}
+		            	
+		            	try {
+		            		if(!fnode.isDirectory()) {
+		                		String filename=fnode.toString();
+		                    	String file=filename;
+		                    	if(filename.contains("\\")){
+		                        	file = filename.substring(filename.lastIndexOf("\\") + 1);
+		                    	}
+		                    	else if(filename.contains("/")){
+		                    		file = filename.substring(filename.lastIndexOf("/") + 1);
+		                    		}
+		                    
+		                    	StringBuilder sb = new StringBuilder();
+		                    	BufferedReader d;
+		                    
+		                    	d = new BufferedReader(new FileReader(filename));
+		                    	String line;
+		                    	while((line=d.readLine())!=null)
+		                             sb.append(line + "\n");
+		                    	d.close();
+		                    
+		                    	open_from_string(sb.toString(), file);
+		            		}
+		            	}
+		            	catch(Exception exx) {
+		            		exx.printStackTrace();
+		            	}
+		            }
+		        }
+		    }
+		};
+		
+		ftree.addMouseListener(ml);
+		
+         documentPane.addTab(" File Browser", docExView);
 
 
 
@@ -683,14 +758,14 @@ public final class EditorWindow extends JFrame
 
 
 
-        //set visibility to document selector
+        //set visibility to 
         if(isDocumentSelect.equals("true")){
             jsplit.getLeftComponent().setVisible(true);
             jsplit.setDividerLocation(210);
-            view_documentselector.setSelected(true);
+            view_documentpane.setSelected(true);
         }else{
             jsplit.getLeftComponent().setVisible(false);
-            view_documentselector.setSelected(false);
+            view_documentpane.setSelected(false);
         }
 
 
@@ -699,7 +774,7 @@ public final class EditorWindow extends JFrame
 
         ///////////////////////////////////////
         //set JMenubar
-        setJMenuBar(mb);
+        parent.setJMenuBar(mb);
         
         ///////////////////////////////////////
         //make the status panel for progressbar
@@ -714,10 +789,6 @@ public final class EditorWindow extends JFrame
         statusBar=new JToolBar();
         statusBar.setFloatable(false);
 
-        if (isDarkTheme) {
-            statusBar.setBackground(new Color(10, 10, 10));
-        }
-
         readylabel=new JLabel("JEXTEdit");
         readylabel.setFont(new Font("Calibri",Font.PLAIN,15));
         filenameLabel.setFont(new Font("Calibri",Font.PLAIN,15));
@@ -728,13 +799,6 @@ public final class EditorWindow extends JFrame
         statusBar.add(rowLabel);
         statusBar.add(new JLabel("     "));
         statusBar.add(colLabel);
-
-        if(isDarkTheme){
-            readylabel.setForeground(new Color(240,240,220));
-            filenameLabel.setForeground(new Color(240, 240, 220));
-            rowLabel.setForeground(new Color(240, 240, 220));
-            colLabel.setForeground(new Color(240, 240, 220));
-        }
 
         ///////////////////////////////////////////////////
         //set visibility to status strip
@@ -832,7 +896,7 @@ public final class EditorWindow extends JFrame
 
 
         //add window listener to TabbedNotepad frame
-        addWindowListener(new Load_Close_Frame_Action());
+        parent.addWindowListener(new Load_Close_Frame_Action());
         
         // toolbar in ribbon
         // make it
@@ -845,7 +909,7 @@ public final class EditorWindow extends JFrame
         toolbar_new.setToolTipText("New (CTRL+N)");
         toolbar_new.addActionListener(new ToolBarButtonsAction("new"));
         
-        JButton toolbar_newweb=new JButton(new ImageIcon(this.getClass().getResource("resources/web.png"), "New Web"));
+        JButton toolbar_newweb=new JButton(new ImageIcon(this.getClass().getResource("resources/web.png"), "New Web browser"));
         toolbar_newweb.setToolTipText("New Webkit web browser (CTRL+N+SHIFT)");
         toolbar_newweb.addActionListener((e) -> File_NewWeb_Action());
 
@@ -856,7 +920,12 @@ public final class EditorWindow extends JFrame
         JButton toolbar_open_webrq = new JButton(new ImageIcon(this.getClass().getResource("resources/webrq.png"), "Open From Web"));
         toolbar_open_webrq.setToolTipText("Open from websites with WebRequest");
         toolbar_open_webrq.addActionListener((e) -> {
-        	File_Open_WebRq_Action();
+        	Platform.runLater(new Runnable() {
+        		@Override
+        		public void run() {
+        			File_Open_WebRq_Action();
+        		}
+        	});
         });
 
         JButton toolbar_save = new JButton(new ImageIcon(this.getClass().getResource("resources/save.png"), "Save"));
@@ -876,6 +945,7 @@ public final class EditorWindow extends JFrame
 
         //adding toolbar buttons to _toolbar object
         _toolbar.add(toolbar_new);
+        _toolbar.add(toolbar_newweb);
         _toolbar.addSeparator(new Dimension(4,4));
         _toolbar.add(toolbar_open);
         _toolbar.add(toolbar_open_webrq);
@@ -968,7 +1038,7 @@ public final class EditorWindow extends JFrame
         //**************************************************************
         //get content pane & adding ribbon,spanel & jsplit to it
         //***************************************************************
-        Container cp=getContentPane();
+        Container cp = parent.getContentPane();
         
         // add the progressbar and status bar before adding the spanel
         GridBagLayout gbl = new GridBagLayout();
@@ -1012,10 +1082,12 @@ public final class EditorWindow extends JFrame
         
         cp.add(ribbon,BorderLayout.PAGE_START);
         cp.add(spanel,BorderLayout.SOUTH);
-        cp.add(jsplit);
+        cp.add(jsplit, BorderLayout.CENTER);
+        
+        // cp.add(this);
         
         new DropTarget(this, new FileDND());
-        new DropTarget(cp, new FileDND());
+        new DropTarget(parent, new FileDND());
         new DropTarget(jsplit, new FileDND());
         new DropTarget(ribbon, new FileDND());
         new DropTarget(spanel, new FileDND());
@@ -1074,7 +1146,6 @@ public final class EditorWindow extends JFrame
                     String line;
                     while((line=d.readLine())!=null)
                              sb.append(line + "\n");
-                    System.out.println(sb.toString());
                     d.close();
                     
                     open_from_string(sb.toString(), file);
@@ -1099,11 +1170,6 @@ public final class EditorWindow extends JFrame
 
             _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
-            if(isDarkTheme){
-                _textPane.setBackground(new Color(10, 10, 20));
-                _textPane.setForeground(new Color(250, 250, 250));
-            }
-
             JScrollPane jsp=new JScrollPane(_textPane);
             // add key listener & Undoable edit listener to text pane
             _textPane.addKeyListener(new KeyTypedAction());
@@ -1124,7 +1190,7 @@ public final class EditorWindow extends JFrame
            _list.setSelectedIndex(index);
 
            //change the title
-            setTitle("JEXTEdit - [ " + title + " ]");
+            parent.setTitle("JEXTEdit - [ " + title + " ]");
             filenameLabel.setText(title);
             
             _textPane.setText(str);
@@ -1151,10 +1217,6 @@ class WindowMenuAction implements MenuListener
         if (_tabbedPane.getTabCount() > 0) {
 
             windowMenu.removeAll();
-
-            JMenuItem window_restart=new JMenuItem(" Restart                       ");
-            window_restart.addActionListener(new WindowRestartAction());
-            windowMenu.add(window_restart);
 
             windowMenu.addSeparator();
 
@@ -1183,20 +1245,6 @@ class WindowMenuAction implements MenuListener
 
 
 
-//Window Restart action class
-class WindowRestartAction implements ActionListener
-{
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            File_CloseAll_Action();
-            dispose();
-            count = 1;
-            LookAndFeelAction.setBasicLookAndFeel();
-        }
-}
-
-
-
 //******************************************************
 // Window menu item action
 //******************************************************
@@ -1217,7 +1265,7 @@ class Window_MenuItemsAction implements ActionListener
 
                     if (title.equals(menutext)) {
                         _tabbedPane.setSelectedIndex(i);
-                        setTitle("JEXTEdit - [ " + _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex()) + " ]");
+                        parent.setTitle("JEXTEdit - [ " + _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex()) + " ]");
                     }
                 }
             }
@@ -1325,12 +1373,6 @@ class Window_MenuItemsAction implements ActionListener
                     case "Bottom" : View_TabsAlignment_Action("bottom");break;
                     case "Left" : View_TabsAlignment_Action("left");break;
                     case "Right" : View_TabsAlignment_Action("right");break;
-                    case "Java" : View_SetLookAndFeel_Action("java");break;
-                    case "Motif" : View_SetLookAndFeel_Action("motif");break;
-                    case "Nimbus" : View_SetLookAndFeel_Action("nimbus");break;
-                    case "Windows" : View_SetLookAndFeel_Action("windows");break;
-                    case "Windows Classic" : View_SetLookAndFeel_Action("windowsclassic");break;
-                    case "Global Dark" : View_SetLookAndFeel_Action("globaldark");break;
                 }
             }
         }
@@ -1548,11 +1590,6 @@ class Window_MenuItemsAction implements ActionListener
 
          _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
-         if(isDarkTheme){
-             _textPane.setBackground(new Color(10, 10, 20));
-             _textPane.setForeground(new Color(250, 250, 250));
-         }
-
          JScrollPane jsp=new JScrollPane(_textPane);
          // add key listener & Undoable edit listener to text pane
          _textPane.addKeyListener(new KeyTypedAction());
@@ -1573,7 +1610,7 @@ class Window_MenuItemsAction implements ActionListener
         _list.setSelectedIndex(index);
 
         //change the title
-         setTitle("JEXTEdit - [ Document "+count+" ]");
+         parent.setTitle("JEXTEdit - [ Document "+count+" ]");
          filenameLabel.setText("Document "+count);
 
          count++;
@@ -1588,10 +1625,19 @@ class Window_MenuItemsAction implements ActionListener
     	PrintStream oldPrintErr = System.err;
     	Platform.runLater(() -> progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS));    	
     	// remove errors
-    	System.setErr(new PrintStream(OutputStream.nullOutputStream())); 
-    	
+    	// System.setErr(new PrintStream(OutputStream.nullOutputStream())); 
         //create JFXWeb object
-        JEmbeddedWeb web = new JEmbeddedWeb();
+    	
+    	CountDownLatch l = new CountDownLatch(1);
+    	JEmbeddedWeb[] web = {null};
+    	try {
+        	web[0] = new JEmbeddedWeb();
+        	throw new IllegalStateException("ded");
+        }
+        catch(IllegalStateException ise) {
+        	
+        }
+        
     	// JFXWeb web = new JFXWeb();
          
          // change the streams back
@@ -1599,19 +1645,19 @@ class Window_MenuItemsAction implements ActionListener
          assert System.err == oldPrintErr;
          
          //add tab to _tabbedPane with control textpane
-         _tabbedPane.addTab("WebDocument "+count+" ",web);
+         _tabbedPane.addTab("WebDocument "+webcount+" ",web[0]);
          int index=_tabbedPane.getTabCount()-1;
 
          _tabbedPane.setSelectedIndex(index);
          _tabbedPane.setIconAt(index, new ImageIcon(this.getClass().getResource("resources/web.png")));
-         listModel.addElement("WebDocument "+count+" ");
+         listModel.addElement("WebDocument "+webcount+" ");
 
         _list.setSelectedIndex(index);
 
         //change the title
-         setTitle("JEXTEdit - [ WebDocument "+count+" ]");
+         parent.setTitle("JEXTEdit - [ WebDocument "+webcount+" ]");
 
-         count++;
+         webcount++;
          
          Platform.runLater(() -> progressBar.setProgress(0)); 
     }
@@ -1645,11 +1691,6 @@ class Window_MenuItemsAction implements ActionListener
                JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
                _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
-               if (isDarkTheme) {
-                    _textPane.setBackground(new Color(10, 10, 20));
-                    _textPane.setForeground(new Color(250, 250, 250));
-                }
-
                JScrollPane jsp=new JScrollPane(_textPane);
                _textPane.addKeyListener(new KeyTypedAction());
                 _textPane.getDocument().addUndoableEditListener(_undoManager);
@@ -1661,7 +1702,7 @@ class Window_MenuItemsAction implements ActionListener
                listModel.addElement(file);
                _list.setSelectedIndex(count);
 
-               setTitle("JEXTEdit - [ "+file+" ]");
+               parent.setTitle("JEXTEdit - [ "+file+" ]");
                filenameLabel.setText(filename);
                filesHoldListModel.addElement(filename);
                
@@ -1698,7 +1739,20 @@ class Window_MenuItemsAction implements ActionListener
     //********************************************************
     public void File_Open_WebRq_Action()
     {
-    	String url = JOptionPane.showInputDialog("What URL do you want to open?");
+    	String url = null;
+    	
+    	TextInputDialog dialog = new TextInputDialog("https://google.com");
+    	
+    	dialog.setTitle("WebRequest download");
+    	dialog.setHeaderText("WebRq");
+    	
+    	Optional<String> result = dialog.showAndWait(); 
+    	
+    	if(result.isPresent()) {
+    		url = result.get();
+    	}
+    	
+    	// String url = JOptionPane.showInputDialog(this, "What URL do you want to open?", "https://google.com");
     	
          if (url!=null)
          {
@@ -1716,11 +1770,6 @@ class Window_MenuItemsAction implements ActionListener
                JTextArea _textPane=new JTextArea(); new DropTarget(_textPane, new FileDND());
                _textPane.setFont(new Font("Calibri",Font.PLAIN,14));
 
-               if (isDarkTheme) {
-                    _textPane.setBackground(new Color(10, 10, 20));
-                    _textPane.setForeground(new Color(250, 250, 250));
-                }
-
                JScrollPane jsp=new JScrollPane(_textPane);
                _textPane.addKeyListener(new KeyTypedAction());
                 _textPane.getDocument().addUndoableEditListener(_undoManager);
@@ -1732,7 +1781,7 @@ class Window_MenuItemsAction implements ActionListener
                listModel.addElement(file);
                _list.setSelectedIndex(count);
 
-               setTitle("JEXTEdit - [ "+file+" ]");
+               parent.setTitle("JEXTEdit - [ "+file+" ]");
                filenameLabel.setText(filename);
                filesHoldListModel.addElement(filename);
                
@@ -1798,7 +1847,7 @@ class Window_MenuItemsAction implements ActionListener
                        {
                            tabtext=tabtext.replace("*", "");
                            _tabbedPane.setTitleAt(sel, tabtext);
-                           setTitle("JEXTEdit - [ "+tabtext+" ]");
+                           parent.setTitle("JEXTEdit - [ "+tabtext+" ]");
                            _tabbedPane.setIconAt(sel,new ImageIcon(this.getClass().getResource("resources/save.png")));
                        }
 
@@ -1863,7 +1912,7 @@ class Window_MenuItemsAction implements ActionListener
 
                     _tabbedPane.setIconAt(sel, new ImageIcon(this.getClass().getResource("resources/save.png")));
 
-                    setTitle("JEXTEdit - [ " + file + " ]");
+                    parent.setTitle("JEXTEdit - [ " + file + " ]");
 
                 }
                 catch (Exception ex)
@@ -1912,7 +1961,7 @@ class Window_MenuItemsAction implements ActionListener
                             if (tabtext.contains("*")) {
                                 tabtext = tabtext.replace("*", "");
                                 _tabbedPane.setTitleAt(sel, tabtext);
-                                setTitle("JEXTEdit - [ " + tabtext + " ]");
+                                parent.setTitle("JEXTEdit - [ " + tabtext + " ]");
                                 _tabbedPane.setIconAt(sel, new ImageIcon(this.getClass().getResource("resources/save.png")));
                             }
 
@@ -1983,7 +2032,7 @@ class Window_MenuItemsAction implements ActionListener
 
                         if(_tabbedPane.getTabCount()==0)
                         {
-                            setTitle("JEXTEdit");
+                            parent.setTitle("JEXTEdit");
                             filenameLabel.setText("");
                             rowLabel.setText("Row :");
                             colLabel.setText("Col :");
@@ -2017,7 +2066,7 @@ class Window_MenuItemsAction implements ActionListener
 
                         if (_tabbedPane.getTabCount() == 0)
                         {
-                            setTitle("JEXTEdit");
+                            parent.setTitle("JEXTEdit");
                             filenameLabel.setText("");
                             rowLabel.setText("Row :");
                             colLabel.setText("Col :");
@@ -2050,7 +2099,7 @@ class Window_MenuItemsAction implements ActionListener
 
                     if (_tabbedPane.getTabCount() == 0)
                     {
-                        setTitle("JEXTEdit");
+                        parent.setTitle("JEXTEdit");
                         filenameLabel.setText("");
                         rowLabel.setText("Row :");
                         colLabel.setText("Col :");
@@ -2082,7 +2131,7 @@ class Window_MenuItemsAction implements ActionListener
 
                 if (_tabbedPane.getTabCount() == 0)
                 {
-                    setTitle("JEXTEdit");
+                    parent.setTitle("JEXTEdit");
                     filenameLabel.setText("");
                     rowLabel.setText("Row :");
                     colLabel.setText("Col :");
@@ -2093,7 +2142,7 @@ class Window_MenuItemsAction implements ActionListener
 
         else
         {
-            setTitle("JEXTEdit");
+            parent.setTitle("JEXTEdit");
             filenameLabel.setText("");
             rowLabel.setText("Row :");
             colLabel.setText("Col :");
@@ -2241,7 +2290,7 @@ class Window_MenuItemsAction implements ActionListener
 
         else
         {
-            setTitle("JEXTEdit");
+            parent.setTitle("JEXTEdit");
             filenameLabel.setText("");
 
             rowLabel.setText("Row :");
@@ -2283,7 +2332,7 @@ class Window_MenuItemsAction implements ActionListener
         File_CloseAll_Action();
         if (_tabbedPane.getTabCount() == 0)
         {
-            System.exit(0);
+            parent.dispose();
         }
     }
 
@@ -2527,13 +2576,6 @@ class Window_MenuItemsAction implements ActionListener
             JLabel replacewith=new JLabel("Replace With : ");
             findText=new JTextField(20);
             replaceText=new JTextField(20);
-
-            if(isDarkTheme){
-                findwhat.setForeground(Color.WHITE);
-                replacewith.setForeground(Color.WHITE);
-                findText.setBackground(new Color(40,40,40));
-                replaceText.setBackground(new Color(40, 40, 40));
-            }
 
             replaceButton=new JButton("Replace All");
             cancelButton=new JButton("Cancel");
@@ -2859,12 +2901,12 @@ class Window_MenuItemsAction implements ActionListener
 
 
     //********************************************************
-    // Document selector action
+    //  action
     //********************************************************
-    public class View_DocumentSelector_Action implements ActionListener
+    public class View_DocumentPane_Action implements ActionListener
     {
         JCheckBoxMenuItem jcbmi;
-        public View_DocumentSelector_Action(JCheckBoxMenuItem jcm)
+        public View_DocumentPane_Action(JCheckBoxMenuItem jcm)
         {
             jcbmi=jcm;
         }
@@ -2878,13 +2920,13 @@ class Window_MenuItemsAction implements ActionListener
                 jtb.setVisible(true);
                 jsplit.setDividerLocation(210);
 
-                ReplaceViewsFileNodeText("documentSelector","false","true");
+                ReplaceViewsFileNodeText("documentpane","false","true");
             }
             else
             {
                 JTabbedPane jtb = (JTabbedPane) jsplit.getLeftComponent();
                 jtb.setVisible(false);
-                ReplaceViewsFileNodeText("documentSelector","true","false");
+                ReplaceViewsFileNodeText("documentpane","true","false");
             }
         }
     }
@@ -2951,119 +2993,6 @@ class Window_MenuItemsAction implements ActionListener
                 spanel.setVisible(false);
                 ReplaceViewsFileNodeText("statusStrip", "true", "false");
             }
-        }
-    }
-
-
-
-    //********************************************************
-    // set look and feels
-    //********************************************************
-    public void View_SetLookAndFeel_Action(String type)
-    {
-        switch (type) {
-            case "java":
-                {
-                    int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Basic Java Metal look and feel theme",
-                            "Set Basic Java Metal Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                    if (n == 0)
-                    {
-                        File_CloseAll_Action();
-                        dispose();
-                        count = 1;
-                        isDarkTheme=false;
-                        ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "Java");
-
-                        LookAndFeelAction.setBasicLookAndFeel();
-
-
-                    }       break;
-                }
-            case "motif":
-            {
-                int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Motif look and feel theme",
-                        "Set Motif Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                if (n == 0)
-                {
-                    File_CloseAll_Action();
-                    dispose();
-                    count=1;
-                    isDarkTheme=false;
-
-                    ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "Motif");
-
-                    LookAndFeelAction.setMotifLookAndFeel();
-
-                }       break;
-            }
-            case "nimbus":
-            {
-                int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Nimbus look and feel theme",
-                        "Set Nimbus Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                if (n == 0)
-                {
-                    File_CloseAll_Action();
-                    dispose();
-                    count=1;
-                    isDarkTheme=false;
-
-                    ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "Nimbus");
-
-                    LookAndFeelAction.setNimbusLookAndFeel();
-
-                }     break;
-            }
-            case "windows":
-            {
-                int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Windows look and feel theme",
-                        "Set Windows Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                if (n == 0)
-                {
-                    File_CloseAll_Action();
-                    dispose();
-                    count=1;
-                    isDarkTheme=false;
-
-                    ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "Windows");
-
-                    LookAndFeelAction.setWindowsLookAndFeel();
-
-                }     break;
-            }
-            case "windowsclassic":
-            {
-                int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Windows Classic look and feel theme",
-                        "Set Windows Classic Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                if (n == 0)
-                {
-                    File_CloseAll_Action();
-                    dispose();
-                    count=1;
-                    isDarkTheme=false;
-
-                    ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "WindowsClassic");
-
-                    LookAndFeelAction.setWindowsClassicLookAndFeel();
-
-                }    break;
-            }
-            case "globaldark":
-            {
-                int n = JOptionPane.showConfirmDialog(null, "Click OK to restart the application & to set Global Dark look and feel theme",
-                        "Set Global Dark Look and feel", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
-                if (n == 0) {
-                    File_CloseAll_Action();
-                    dispose();
-                    count = 1;
-                        isDarkTheme = true;
-
-                        ReplaceViewsFileNodeText("lookAndFeel", getNodeTextContent("lookAndFeel"), "GlobalDark");
-
-                        LookAndFeelAction.setGlobalDarkLookAndFeel();
-
-                    }
-                    break;
-                }
         }
     }
 
@@ -3204,7 +3133,7 @@ class Window_MenuItemsAction implements ActionListener
                   File_CloseAll_Action();
                   if (_tabbedPane.getTabCount() == 0)
                   {
-                      System.exit(0);
+                      parent.dispose();
                   }
               }
           }
@@ -3238,7 +3167,7 @@ class Window_MenuItemsAction implements ActionListener
                              if(title.equals(list_item))
                               {
                                   _tabbedPane.setSelectedIndex(i);
-                                  setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
+                                  parent.setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
                               }
                           }
                       }
@@ -3275,14 +3204,14 @@ class Window_MenuItemsAction implements ActionListener
                           if(file.equals(tabtext))
                           {
                               filenameLabel.setText(filename.toString());
-                              setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
+                              parent.setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
                           }
                       }
 
                       if(tabtext.contains("Document "))
                       {
                           filenameLabel.setText(tabtext);
-                          setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
+                          parent.setTitle("JEXTEdit - [ "+_tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex())+" ]");
                       }
 
                   }
@@ -3295,12 +3224,11 @@ class Window_MenuItemsAction implements ActionListener
           //********************************************************
           // writing contents to files/viewsfile.xml file
           //********************************************************
-          void WriteXMLFile_ViewContents(String documentSelector,String lookFeel,String statusStrip,
+          void WriteXMLFile_ViewContents(String documentpane,String statusStrip,
                                           String tabsAlign,String toolStrip)
           {
               Views views = new Views();
-              views.setDocumentSelector(documentSelector);
-              views.setLookAndFeel(lookFeel);
+              views.setdocumentPane(documentpane);
               views.setStatusStrip(statusStrip);
               views.setTabsAlignment(tabsAlign);
               views.setToolStrip(toolStrip);
@@ -3349,8 +3277,7 @@ class Window_MenuItemsAction implements ActionListener
                       }
 
                       //writing all contents to a file
-                      WriteXMLFile_ViewContents(eElement.getElementsByTagName("documentSelector").item(0).getTextContent(),
-                                                eElement.getElementsByTagName("lookAndFeel").item(0).getTextContent(),
+                      WriteXMLFile_ViewContents(eElement.getElementsByTagName("documentpane").item(0).getTextContent(),
                                                 eElement.getElementsByTagName("statusStrip").item(0).getTextContent(),
                                                 eElement.getElementsByTagName("tabsAlignment").item(0).getTextContent(),
                                                 eElement.getElementsByTagName("toolStrip").item(0).getTextContent());
@@ -3395,42 +3322,9 @@ class Window_MenuItemsAction implements ActionListener
       //*********************************************************************
       public void run(String args[])
       {
-      	//start application with theme by reading nodetag lookAndFeel from file viewsfile.xml
-      	String themetype = getNodeTextContent("lookAndFeel");
-      	switch(themetype){
-      			case "Java" :
-      				isDarkTheme = false;
-      				LookAndFeelAction.setBasicLookAndFeel();
-      				break;
-
-      			case "Motif":
-      				isDarkTheme = false;
-      				LookAndFeelAction.setMotifLookAndFeel();
-      				break;
-
-      			case "Nimbus":
-      				isDarkTheme = false;
-      				LookAndFeelAction.setNimbusLookAndFeel();
-      				break;
-
-      			case "Windows":
-      				isDarkTheme = false;
-      				LookAndFeelAction.setWindowsLookAndFeel();
-      				break;
-
-      			case "WindowsClassic":
-      				isDarkTheme = false;
-      				LookAndFeelAction.setWindowsClassicLookAndFeel();
-      				break;
-
-      			case "GlobalDark":
-      				isDarkTheme = true;
-      				LookAndFeelAction.setGlobalDarkLookAndFeel();
-      				break;
-
-      		}
       	
-      	}
+      
+      }
 
 
 

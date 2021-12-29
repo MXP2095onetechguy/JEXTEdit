@@ -1,0 +1,19 @@
+/* JavaFX web browser design */
+
+
+
+.button{
+	-fx-background-color: darkslateblue;
+	-fx-text-fill: white;
+}
+
+.button:hover{
+	-fx-background-color: slateblue;
+}
+
+.button:pressed{
+	-fx-background-color: magenta;
+}
+
+.webview{
+}

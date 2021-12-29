@@ -45,13 +45,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import javax.swing.*;
 
-import MXPSQL.JEXTEdit.EditorWindow.ToolBarButtonsAction;
-
-import java.awt.*;
 import java.util.*;
 
 // public class RibbonBar extends JTabbedPane {
 public class RibbonBar extends JTabbedPane {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public Map<String, JToolBar> tape = new HashMap<String, JToolBar>();
 	
 	public RibbonBar() {
@@ -74,6 +75,7 @@ public class RibbonBar extends JTabbedPane {
 	public void updateRibbon() {
         for(Map.Entry<String, JToolBar> entry : tape.entrySet()) {
         	tape.get(entry.getKey()).setFloatable(false);;
+        	
         }
 	}
 }

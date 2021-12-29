@@ -49,7 +49,7 @@ import jakarta.xml.bind.annotation.*;
 public class Views {
 
     String tabsAlign;
-    String documentSelector;
+    String documentPane;
     String toolStrip;
     String statusStrip;
     String lookAndFeel;
@@ -63,13 +63,13 @@ public class Views {
         this.tabsAlign = tabsAlign;
     }
 
-    public String getDocumentSelector() {
-        return documentSelector;
+    public String getdocumentPane() {
+        return documentPane;
     }
 
     @XmlElement
-    public void setDocumentSelector(String documentSelector) {
-        this.documentSelector = documentSelector;
+    public void setdocumentPane(String documentPane) {
+        this.documentPane = documentPane;
     }
 
     public String getToolStrip() {

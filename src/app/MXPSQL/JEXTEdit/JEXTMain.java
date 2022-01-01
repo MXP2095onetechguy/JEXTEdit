@@ -196,7 +196,7 @@ public class JEXTMain{
 					 SynthLookAndFeel laf = new SynthLookAndFeel();
 					 try {
 						laf.load(JEXTMain.class.getResource(synthlafxml));
-					} catch (ParseException e1) {
+					} catch (ParseException | IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 						throw new IllegalStateException("Error while using synth laf!");

@@ -1091,6 +1091,7 @@ public final class EditorWindow extends JPanel
         new DropTarget(jsplit, new FileDND());
         new DropTarget(ribbon, new FileDND());
         new DropTarget(spanel, new FileDND());
+        
 
     }
     

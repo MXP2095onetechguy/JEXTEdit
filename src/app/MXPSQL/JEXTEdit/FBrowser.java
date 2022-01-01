@@ -3,9 +3,49 @@ package MXPSQL.JEXTEdit;
 import java.io.*;
 import java.util.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.WatchKey;
+import java.nio.file.FileSystems;
+import java.nio.file.WatchService;
+import java.nio.file.FileVisitResult;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.WatchEvent;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import static java.nio.file.StandardWatchEventKinds.*;
+
 import javax.swing.*;
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
+import javax.swing.event.TreeModelListener;
+
+class WatchRegister{
+	static boolean trace = false;
+	
+    static void register(Path dir, WatchService watcher, Map<WatchKey,Path> keys) throws IOException {
+        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+        keys.put(key, dir);
+    }
+
+    /**
+     * Register the given directory, and all its sub-directories, with the
+     * WatchService.
+     */
+    static void registerAll(final Path start, WatchService watcher, Map<WatchKey, Path> keys) throws IOException {
+        // register directory and sub-directories
+        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                throws IOException
+            {
+                register(dir, watcher, keys);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+}
 
 class FileTreeModel implements TreeModel {
 	 
@@ -86,6 +126,10 @@ class FileTreeModel implements TreeModel {
 
 public class FBrowser extends JPanel {
 	JRelodableTree ftree;
+	WatchService watcher;
+	HashMap<WatchKey, Path> keys;
+	
+	private boolean modelUpdated = false;
 	
 	  public void getFList(DefaultMutableTreeNode node, File f) {
 		  // System.out.println(f);
@@ -108,6 +152,22 @@ public class FBrowser extends JPanel {
 		
 		DefaultMutableTreeNode compModel = new DefaultMutableTreeNode("Computer");
 		TreeModel model = null;
+		
+		keys = new HashMap<WatchKey, Path>();
+		
+		try {
+			watcher = FileSystems.getDefault().newWatchService();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error with fbrowser", JOptionPane.ERROR_MESSAGE);
+		}
+		
+		try {
+			WatchRegister.registerAll(fsmap.get("cwd")[0].toPath(), watcher, keys);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		if(fsmap.get("roots") != null) {
 			File[] rdirs = fsmap.get("roots");
@@ -161,8 +221,68 @@ public class FBrowser extends JPanel {
 			
 		}
 		
+		// swingworker for jtree
+		if(fsmap.get("cwd") != null) {
+			File[] cdirs = fsmap.get("cwd");
+			
+			
+			SwingWorker JTreeWorker = new SwingWorker() {
+
+				@Override
+				protected Object doInBackground() throws Exception {
+					// TODO Auto-generated method stub
+					WatchKey key;
+					
+					while(!isCancelled()) {
+						
+						try {
+							key = watcher.take();
+						}
+						catch(Exception e) {
+							e.printStackTrace();
+							cancel(false);
+							break;
+						}
+						
+						Path dir = keys.get(key);
+						if(dir == null) {
+							continue;
+						}
+						
+						for(WatchEvent<?> event: key.pollEvents()) {
+							WatchEvent.Kind<?> kind = event.kind();
+							System.out.println(kind);
+							
+							if(kind == OVERFLOW) {
+								continue;
+							}
+							
+					        WatchEvent<Path> ev = (WatchEvent<Path>)event;
+					        Path filename = ev.context();
+					        
+							if(kind == ENTRY_CREATE || kind == ENTRY_DELETE || kind == ENTRY_MODIFY) {
+								modelUpdated = true;
+							}
+						}
+						
+						if(modelUpdated) {
+							TreeModel model2 = new FileTreeModel(cdirs[0]);
+							ftree.setModel(model2);
+						}
+						
+						modelUpdated = false;
+					}
+					return null;
+				}
+				
+			};
+			
+			// JTreeWorker.execute();
+		}
+		
 		// ftree = new JRelodableTree(compModel);
 		ftree = new JRelodableTree(model);
+		modelUpdated = false;
 		// ftree.reload();
 		// ftree.setRootVisible(false);
 		JScrollPane scp = new JScrollPane(ftree);

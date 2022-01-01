@@ -45,7 +45,7 @@ package MXPSQL.JEXTEdit;
 
 import java.io.*;
 import java.nio.file.*;
-
+import java.text.ParseException;
 import java.net.URISyntaxException;
 
 import java.awt.*;
@@ -53,6 +53,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.*;
+import javax.swing.plaf.synth.SynthLookAndFeel;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -78,7 +79,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 
 /* this class handles the window_ifm, asset unziping and argument parsing and the entry point
-   basically, a dedicated main method */
+   basically, a dedicated main method, if this does not exists, the other method is more golly messy code like your pasta le sphagetti */
  
 public class JEXTMain{
 	// app
@@ -109,6 +110,7 @@ public class JEXTMain{
 	static Configurations configEngine = new Configurations();
 	static Configuration propertiesConfig;
 	static String theme = "BusinessBlue";
+	static String synthlafxml = "";
 	
 	public static void run() {
 		
@@ -190,6 +192,24 @@ public class JEXTMain{
 						throw new IllegalStateException("Error while using Metal look and feel");
 					}
 					break;
+				case "Synth":
+					 SynthLookAndFeel laf = new SynthLookAndFeel();
+					 try {
+						laf.load(JEXTMain.class.getResource(synthlafxml));
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						throw new IllegalStateException("Error while using synth laf!");
+					}
+					 
+					try {
+						UIManager.setLookAndFeel(laf);
+					} catch (UnsupportedLookAndFeelException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						throw new IllegalStateException("Error while trying to set the synth look and feel");
+					}
+					break;
 				default:
 					RadianceThemingCortex.GlobalScope.setSkin(new BusinessBlueSteelSkin());
 					throw new IllegalArgumentException("Invalid theme!");
@@ -214,7 +234,7 @@ public class JEXTMain{
 			window.addWindowListener(new WindowListener() {
 				@Override
 		         public void windowClosing(WindowEvent windowEvent){
-		             System.exit(0);
+					System.exit(0);
 		          }
 
 				@Override
@@ -421,6 +441,10 @@ public class JEXTMain{
         	propertiesConfig = configEngine.properties((new JEXTMain()).getClass().getResource("files/config.properties"));
         	theme = propertiesConfig.getString("theming", "BusinessBlue");
         	cVer = propertiesConfig.getFloat("version", -1f);
+        	
+        	if(theme == "Synth") {
+        		synthlafxml = propertiesConfig.getString("SynthThemeFile");
+        	}
         }
         catch(ConfigurationException cex) {
         	cex.printStackTrace();
@@ -484,6 +508,8 @@ public class JEXTMain{
 		catch(Exception e) {
 			System.err.println("Time to crash, an error had occured");
 			e.printStackTrace(System.err);
+			
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error with application", JOptionPane.ERROR_MESSAGE);
 			System.exit(0);
 		}
 	}
